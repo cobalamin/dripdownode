@@ -1,0 +1,19 @@
+{
+  "name": "dripdownode",
+  "version": "0.0.0",
+  "description": "A node-based tool to fetch and unpack releases from drip.fm. If used with atom-shell, provides a nice GUI",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pommesgabel/dripdownode.git"
+  },
+  "author": "Simon Welker <simon.welker@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pommesgabel/dripdownode/issues"
+  },
+  "homepage": "https://github.com/pommesgabel/dripdownode",
+  "dependencies": {
+    "request": "^2.44.0"
+  }
+}
