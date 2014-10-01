@@ -54,14 +54,11 @@ function getReleases(subscription) {
 				strictSSL: true,
 				headers: { "cookie": res.cookie }
 			}, function getReleasesCb(err, msg, body) {
-				if(err) {
-					reject(err);
-				}
-				else if(msg.statusCode >= 400) {
-					reject("HTTP Error " + msg.statusCode + " at " + url);
+				if(!err && msg.statusCode < 400) {
+					resolve(body);
 				}
 				else {
-					resolve(body);
+					reject(err || "HTTP Error " + msg.statusCode + " at " + url);
 				}
 			});
 		});
