@@ -1,7 +1,9 @@
 var read = require('read'),
 	Q = require('q'),
 
-	dl = require('./downloader');
+	dl = require('./downloader'),
+
+	_ = require('lodash-node/modern');
 
 // More script-like aliases
 var print = console.log,
@@ -64,25 +66,47 @@ login
  */
 function printReleases(releases) {
 	print();
-
-	var availableReleases = releases.filter(function(release) {
-		return release.unlocked;
-	});
-
 	var serviceName = chosenSub.creative.service_name;
 	print(chosenSub.creative.service_name);
 	printUnderline(serviceName);
 
-	var lockedReleaseCount = releases.length - availableReleases.length;
+	// TODO fetch all releases (they're paged to 20). See `set_releases` inside
+	// the original drip-downloader script for this
+
+	var upcomingReleases = releases.filter(function(release) {
+		// Interesting naming, drip.fm!
+		return release.state !== 'syndicated';
+	});
+	var publishedReleases = _.difference(releases, upcomingReleases);
+	var availableReleases = publishedReleases.filter(function(release) {
+		return release.unlocked;
+	});
+
+	var lockedReleaseCount = publishedReleases.length - availableReleases.length;
 	var remainingUnlocks = chosenSub.unlocks_remaining;
 	print('You have ' + availableReleases.length + ' available releases, and ' +
 		lockedReleaseCount + ' locked releases.');
-	if(remainingUnlocks) {
-		print('You still have ' + remainingUnlocks + ' remaining unlocks, so ' +
-			'go to the drip website and unlock some cool stuff!')
+
+	// Info about locked/available releases and remaining unlocks
+	if(lockedReleaseCount) {
+		if(remainingUnlocks) {
+			print('You still have ' + remainingUnlocks + ' remaining unlocks, so ' +
+				'go to the drip website and unlock some cool stuff!');
+		}
+		else {
+			print('Aw, you have no remaining unlocks for this subscription, wait a month!');
+		}
 	}
 	else {
-		print('Aw, you have no remaining unlocks for this subscription, wait a month!');
+		if(remainingUnlocks) {
+			print('You have ' + remainingUnlocks + ' remaining unlocks, but no locked releases. How does that make you feel?');
+		}
+	}
+
+	// Info about upcoming releases
+	var upcomingReleaseCount = upcomingReleases.length;
+	if(upcomingReleaseCount) {
+		print("Oh by the way, there's " + upcomingReleaseCount + " upcoming releases on this drip!");
 	}
 
 	return availableReleases;
