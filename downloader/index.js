@@ -47,8 +47,9 @@ function getReleases(subscription) {
 	return Q.promise(function(resolve, reject) {
 		login()
 		.then(function(res) {
+			var url = urls.releases(subscription.creative);
 			request.get({
-				url: urls.releases(subscription.creative),
+				url: url,
 				json: true,
 				strictSSL: true,
 				headers: { "cookie": res.cookie }
@@ -57,7 +58,7 @@ function getReleases(subscription) {
 					reject(err);
 				}
 				else if(msg.statusCode >= 400) {
-					reject("HTTP Error " + msg.statusCode);
+					reject("HTTP Error " + msg.statusCode + " at " + url);
 				}
 				else {
 					resolve(body);
