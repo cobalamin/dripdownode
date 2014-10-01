@@ -48,8 +48,11 @@ login
 .then(chooseSubscription)
 
 .then(dl.getReleases)
-.then(printReleases, function(e) { printerr('Error fetching releases: ' + e); });
-// .then(downloadReleases);
+.then(printReleases, function(e) { printerr('Error fetching releases: ' + e); })
+.then(dl.downloadReleases)
+.then(function() {
+	// ...
+});
 
 
 // ============================ Function definitions ===========================
@@ -57,7 +60,7 @@ login
 /**
  * Prints release information from an array of releases
  * @param  {Array} releases The array of releases
- * @return {Array} The `releases` parameter, unchanged
+ * @return {Array} The available (unlocked) releases
  */
 function printReleases(releases) {
 	print();
@@ -82,7 +85,7 @@ function printReleases(releases) {
 		print('Aw, you have no remaining unlocks for this subscription, wait a month!');
 	}
 
-	return releases;
+	return availableReleases;
 }
 
 /**

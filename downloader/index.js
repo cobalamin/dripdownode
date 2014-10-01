@@ -1,11 +1,13 @@
 module.exports = {
 	login: login,
 	getSubscriptions: getSubscriptions,
-	getReleases: getReleases
+	getReleases: getReleases,
+	downloadReleases: downloadReleases
 };
 
 var request = require('request'),
-	Q = require('q'),
+	Q = require('q')
+	fs = require('fs'),
 
 	urls = require('./endpoints');
 
@@ -52,15 +54,54 @@ function getReleases(subscription) {
 				url: url,
 				json: true,
 				strictSSL: true,
-				headers: { "cookie": res.cookie }
+				headers: { "Cookie": res.cookie }
 			}, function getReleasesCb(err, msg, body) {
 				if(!err && msg.statusCode < 400) {
 					resolve(body);
 				}
 				else {
-					reject(err || "HTTP Error " + msg.statusCode + " at " + url);
+					reject(err || getErrorMsg(msg, url));
 				}
 			});
 		});
 	});
+}
+
+function downloadReleases(releases) {
+	var promises = releases.map(function(release) {
+		// return downloadRelease(release);
+	});
+
+	return Q.allSettled([downloadRelease(releases[0])]);
+}
+
+function downloadRelease(release) {
+	return Q.promise(function(resolve, reject) {
+		login()
+		.then(function(res) {
+			var url = urls.downloadRelease(release, 'mp3'); // TODO formats
+
+			var fileWriteStream = fs.createWriteStream(release.slug + '.zip');
+			var req = request({
+				url: url,
+				strictSSL: true,
+				headers: { "Cookie": res.cookie }
+			}, function downloadReleaseCb(err, msg, body) {
+				var error = err || getErrorMsg(msg, url);
+			});
+
+			// fires before the request callback
+			// TODO don't resolve here, but in the CB, to check for errors
+			req.on('end', function() {
+				resolve();
+			});
+
+			req.pipe(fileWriteStream);
+		})
+	});
+}
+
+function getErrorMsg(msg, url) {
+	if(msg.statusCode < 400) return;
+	return "HTTP Error " + msg.statusCode + " at " + url;
 }
