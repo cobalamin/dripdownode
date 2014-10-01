@@ -41,14 +41,56 @@ var userData = null,
 	chosenSub = null;
 
 login
-.then(function(res) {
-	userData = res.data;
-	print();
-	print('Logged in! Hi, ' + userData.firstname + ' ' + userData.lastname + ' :)');
-}, function(e) { printerr('Error logging in: ' + e); })
+.then(setUserData, function(e) { printerr('Error logging in: ' + e); })
 
 .then(dl.getSubscriptions)
-.then(function(subscriptions) {
+.then(printSubscriptions, function(e) { printerr('Error fetching subscriptions: ' + e); })
+.then(chooseSubscription)
+
+.then(dl.getReleases)
+.then(printReleases, function(e) { printerr('Error fetching releases: ' + e); });
+// .then(downloadReleases);
+
+
+// ============================ Function definitions ===========================
+
+/**
+ * Prints release information from an array of releases
+ * @param  {Array} releases The array of releases
+ * @return {Array} The `releases` parameter, unchanged
+ */
+function printReleases(releases) {
+	print();
+
+	var availableReleases = releases.filter(function(release) {
+		return release.unlocked;
+	});
+
+	var serviceName = chosenSub.creative.service_name;
+	print(chosenSub.creative.service_name);
+	printUnderline(serviceName);
+
+	var lockedReleaseCount = releases.length - availableReleases.length;
+	var remainingUnlocks = chosenSub.unlocks_remaining;
+	print('You have ' + availableReleases.length + ' available releases, and ' +
+		lockedReleaseCount + ' locked releases.');
+	if(remainingUnlocks) {
+		print('You still have ' + remainingUnlocks + ' remaining unlocks, so ' +
+			'go to the drip website and unlock some cool stuff!')
+	}
+	else {
+		print('Aw, you have no remaining unlocks for this subscription, wait a month!');
+	}
+
+	return releases;
+}
+
+/**
+ * Prints all subscriptions from an array of subscriptions
+ * @param  {Array} subscriptions The array of subscriptions
+ * @return {Array} The `subscriptions` parameter, unchanged
+ */
+function printSubscriptions(subscriptions) {
 	print();
 
 	print("You have the following subscriptions:");
@@ -57,6 +99,16 @@ login
 		print(idx + ') ' + subscription.creative.service_name);
 	});
 
+	return subscriptions;
+}
+
+/**
+ * Asks the user to choose one subscription
+ * @param  {Array} subscriptions The array of subscriptions to choose from
+ * @return {Object} A promise that resolves with the chosen subscription object
+ * when the user enters a valid index
+ */
+function chooseSubscription(subscriptions) {
 	return Q.promise(function(resolve, reject) {
 		var chosenIdx;
 
@@ -70,32 +122,28 @@ login
 			});
 		})();
 	});
-}, function(e) { printerr('Error fetching subscriptions: ' + e); })
+}
 
-.then(dl.getReleases)
-.then(function(releases) {
+/**
+ * Remembers the user data from the login request and logs a little greeting
+ * @param {Object} response The response object of the login request
+ */
+function setUserData(response) {
+	userData = response.data;
 	print();
+	print('Logged in! Hi, ' + userData.firstname + ' ' + userData.lastname + ' :)');
+}
 
-	var availableReleases = releases.filter(function(release) {
-		return release.unlocked;
-	});
-
-	var serviceName = chosenSub.creative.service_name;
-	var underscores = Array.apply(null, { length: serviceName.length })
-		.map(function() { return '='; })
-		.join('');
-	print(chosenSub.creative.service_name);
-	print(underscores);
-
-	var lockedReleaseCount = releases.length - availableReleases.length;
-	var remainingUnlocks = chosenSub.unlocks_remaining;
-	print('You have ' + availableReleases.length + ' available releases, and ' +
-		lockedReleaseCount + ' locked releases.');
-	if(remainingUnlocks) {
-		print('You still have ' + remainingUnlocks + ' remaining unlocks, so ' +
-			'go to the drip website and unlock some cool stuff!')
-	}
-	else {
-		print('Aw, you have no remaining unlocks for this subscription, wait a month!');
-	}
-}, function(e) { printerr('Error fetching releases: ' + e); });
+/**
+ * Prints a string with the same length as the given string, filled with
+ * characters (e.g. =) to underline the string
+ * @param  {String} str The string to underline
+ */
+function printUnderline(str) {
+	var underlineChar = '=';
+	print(
+		Array.apply(null, { length: str.length })
+		.map(function() { return underlineChar; })
+		.join('')
+	);
+}
