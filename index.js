@@ -43,12 +43,15 @@ var userData = null,
 login
 .then(function(res) {
 	userData = res.data;
+	print();
+	print('Logged in! Hi, ' + userData.firstname + ' ' + userData.lastname + ' :)');
 }, function(e) { printerr('Error logging in: ' + e); })
 
 .then(dl.getSubscriptions)
 .then(function(subscriptions) {
 	print();
 
+	print("You have the following subscriptions:");
 	subscriptions.forEach(function(subscription, idx) {
 		idx = idx + 1; // Start output at 1)
 		print(idx + ') ' + subscription.creative.service_name);
@@ -58,7 +61,7 @@ login
 		var chosenIdx;
 
 		(function chooseSubscription() {
-			read({ prompt: "Choose a subscription:" },
+			read({ prompt: "Choose a subscription (by number):" },
 			function(err, index) {
 				chosenIdx = Number(index) - 1;
 				chosenSub = subscriptions[chosenIdx];
@@ -77,11 +80,17 @@ login
 		return release.unlocked;
 	});
 
+	var serviceName = chosenSub.creative.service_name;
+	var underscores = Array.apply(null, { length: serviceName.length })
+		.map(function() { return '='; })
+		.join('');
+	print(chosenSub.creative.service_name);
+	print(underscores);
+
 	var lockedReleaseCount = releases.length - availableReleases.length;
 	var remainingUnlocks = chosenSub.unlocks_remaining;
-	print('You have ' + availableReleases.length + ' available releases on ' +
-		chosenSub.creative.service_name + '!');
-	print('I also found ' + lockedReleaseCount + ' locked releases.');
+	print('You have ' + availableReleases.length + ' available releases, and ' +
+		lockedReleaseCount + ' locked releases.');
 	if(remainingUnlocks) {
 		print('You still have ' + remainingUnlocks + ' remaining unlocks, so ' +
 			'go to the drip website and unlock some cool stuff!')
