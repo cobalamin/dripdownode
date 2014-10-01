@@ -46,6 +46,8 @@ function getSubscriptions() {
 }
 
 function getReleases(subscription) {
+	// TODO fetch all releases (they're paged to 20). See `set_releases` inside
+	// the original drip-downloader script for this
 	return Q.promise(function(resolve, reject) {
 		login()
 		.then(function(res) {
@@ -69,10 +71,10 @@ function getReleases(subscription) {
 
 function downloadReleases(releases) {
 	var promises = releases.map(function(release) {
-		// return downloadRelease(release);
+		return downloadRelease(release);
 	});
 
-	return Q.allSettled([downloadRelease(releases[0])]);
+	return Q.allSettled(promises);
 }
 
 function downloadRelease(release) {
@@ -88,12 +90,8 @@ function downloadRelease(release) {
 				headers: { "Cookie": res.cookie }
 			}, function downloadReleaseCb(err, msg, body) {
 				var error = err || getErrorMsg(msg, url);
-			});
-
-			// fires before the request callback
-			// TODO don't resolve here, but in the CB, to check for errors
-			req.on('end', function() {
-				resolve();
+				if(error) reject(error);
+				else resolve();
 			});
 
 			req.pipe(fileWriteStream);

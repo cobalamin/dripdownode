@@ -51,13 +51,18 @@ login
 
 .then(dl.getReleases)
 .then(printReleases, function(e) { printerr('Error fetching releases: ' + e); })
-.then(dl.downloadReleases)
-.then(function() {
-	// ...
+.then(getAvailableReleases)
+.then(chooseReleases)
+.then(function(releases) {
+	console.log(releases.map(function(release) {
+		return release.artist + ': ' + release.title;
+	}));
 });
 
 
 // ============================ Function definitions ===========================
+
+// ----- Releases
 
 /**
  * Prints release information from an array of releases
@@ -70,23 +75,11 @@ function printReleases(releases) {
 	print(chosenSub.creative.service_name);
 	printUnderline(serviceName);
 
-	// TODO fetch all releases (they're paged to 20). See `set_releases` inside
-	// the original drip-downloader script for this
-
-	var upcomingReleases = releases.filter(function(release) {
-		// Interesting naming, drip.fm!
-		return release.state !== 'syndicated';
-	});
-	var publishedReleases = _.difference(releases, upcomingReleases);
-	var availableReleases = publishedReleases.filter(function(release) {
-		return release.unlocked;
-	});
-
-	var lockedReleaseCount = publishedReleases.length - availableReleases.length;
+	var availableReleases = getAvailableReleases(releases);
+	var lockedReleaseCount = getLockedReleases(releases).length;
 	var remainingUnlocks = chosenSub.unlocks_remaining;
 	print('You have ' + availableReleases.length + ' available releases, and ' +
 		lockedReleaseCount + ' locked releases.');
-
 	// Info about locked/available releases and remaining unlocks
 	if(lockedReleaseCount) {
 		if(remainingUnlocks) {
@@ -104,13 +97,88 @@ function printReleases(releases) {
 	}
 
 	// Info about upcoming releases
-	var upcomingReleaseCount = upcomingReleases.length;
+	var upcomingReleaseCount = getUpcomingReleases(releases).length;
 	if(upcomingReleaseCount) {
 		print("Oh by the way, there's " + upcomingReleaseCount + " upcoming releases on this drip!");
 	}
 
-	return availableReleases;
+	return releases;
 }
+
+/**
+ * TODO
+ * @param  {[type]} releases [description]
+ * @return {[type]}          [description]
+ */
+function chooseReleases(releases) {
+	print();
+	print("Alright, let's choose from the releases.");
+
+	// Nope, doesn't work, we're prompting all at once. TODO ! ! !
+	var choosePromises = releases.map(function(release) {
+		return chooseRelease(release);
+	});
+
+	return Q.allSettled(choosePromises)
+	.then(function(results) {
+		return results.map(function(result) {
+			return result.value;
+		}).filter(function(result) {
+			return !!result;
+		});
+	});
+}
+
+/**
+ * TODO
+ * @param  {[type]} release [description]
+ * @return {[type]}         [description]
+ */
+function chooseRelease(release) {
+	return Q.promise(function(resolve, reject) {
+		read({ prompt: 'Get ' + release.title + ' by ' + release.artist + '? (y/n)' },
+		function(err, choice) {
+			var doDownload = choice == 'y' ? true : (choice == 'n' ? false : null);
+			if(doDownload != null) {
+				if(doDownload) {
+					deferred.resolve(release);
+				}
+				else {
+					deferred.resolve(null);
+				}
+			}
+			else { chooseRelease(); }
+		});
+	});
+}
+
+// Gets the upcoming (not yet released) releases
+function getUpcomingReleases(releases) {
+	return releases.filter(function(release) {
+		// Interesting naming, drip.fm!
+		return release.state !== 'syndicated';
+	});
+}
+
+// Gets the published (released, technically available) releases
+function getPublishedReleases(releases) {
+	return _.difference(releases, getUpcomingReleases(releases));
+}
+
+// Gets the available (published and unlocked) releases
+function getAvailableReleases(releases) {
+	return getPublishedReleases(releases).filter(function(release) {
+		return release.unlocked;
+	});
+}
+
+// Gets the locked releases
+function getLockedReleases(releases) {
+	return _.difference(getPublishedReleases(releases),
+		getAvailableReleases(releases));
+}
+
+// ----- Subscriptions
 
 /**
  * Prints all subscriptions from an array of subscriptions
@@ -151,6 +219,8 @@ function chooseSubscription(subscriptions) {
 	});
 }
 
+// ----- User data
+
 /**
  * Remembers the user data from the login request and logs a little greeting
  * @param {Object} response The response object of the login request
@@ -160,6 +230,8 @@ function setUserData(response) {
 	print();
 	print('Logged in! Hi, ' + userData.firstname + ' ' + userData.lastname + ' :)');
 }
+
+// ----- Output helpers
 
 /**
  * Prints a string with the same length as the given string, filled with
