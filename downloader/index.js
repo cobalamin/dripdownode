@@ -1,21 +1,68 @@
-var request = require('request');
-
-const URLS = {
-	login: 'https://drip.fm/api/users/login'
+module.exports = {
+	login: login,
+	getSubscriptions: getSubscriptions,
+	getReleases: getReleases
 };
 
-var loginCookie = null;
+var request = require('request'),
+	Q = require('q'),
+
+	urls = require('./endpoints');
+
+var loginPromise = null;
 
 function login(email, password) {
-	request.post({
-		url: URLS.login,
-		headers: { "Accept": "application/json" },
-		json: { email: email, password: password },
-		strictSSL: true
-	}, function loginCallback(err, msg, body) {
-		if(err) throw err;
-	})
-	.on('response', function(res) {
-		console.log(res.headers['set-cookie']); // save this
+	if(loginPromise) return loginPromise;
+
+	return loginPromise = Q.Promise(function(resolve, reject, notify) {
+		request.post({
+			url: urls.login,
+			json: { email: email, password: password },
+			strictSSL: true
+		}, function loginCb(err, msg, body) {
+			if(!err && !body.errors) {
+				var loginCookie = msg.headers['set-cookie'];
+				var userData = body;
+
+				resolve({
+					data: userData,
+					cookie: loginCookie
+				});
+			}
+			else {
+				reject(err || body.errors);
+			}
+		});
+	});
+}
+
+function getSubscriptions() {
+	return login()
+	.then(function(res) {
+		return res.data.memberships;
+	}, function(err) { throw err; });
+}
+
+function getReleases(subscription) {
+	return Q.promise(function(resolve, reject) {
+		login()
+		.then(function(res) {
+			request.get({
+				url: urls.releases(subscription.creative),
+				json: true,
+				strictSSL: true,
+				headers: { "cookie": res.cookie }
+			}, function getReleasesCb(err, msg, body) {
+				if(err) {
+					reject(err);
+				}
+				else if(msg.statusCode >= 400) {
+					reject("HTTP Error " + msg.statusCode);
+				}
+				else {
+					resolve(body);
+				}
+			});
+		});
 	});
 }
