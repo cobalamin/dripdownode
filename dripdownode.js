@@ -5,9 +5,8 @@ var read = require('read'),
 
 	_ = require('lodash-node/modern');
 
-// More script-like aliases
-var print = console.log,
-	printerr = console.error;
+// Script-like alias
+var print = console.log;
 
 const DISCLAIMER =
 "/==============================================================================\\\n" +
@@ -43,24 +42,39 @@ var userData = null,
 	chosenSub = null;
 
 login
-.then(setUserData, function(e) { printerr('Error logging in: ' + e); })
+.then(setUserData, terminate('logging in'))
 
 .then(dl.getSubscriptions)
-.then(printSubscriptions, function(e) { printerr('Error fetching subscriptions: ' + e); })
+.then(printSubscriptions, terminate('fetching subscriptions'))
 .then(chooseSubscription)
 
 .then(dl.getReleases)
-.then(printReleases, function(e) { printerr('Error fetching releases: ' + e); })
+.then(printReleases, terminate('fetching releases'))
 .then(getAvailableReleases)
 .then(chooseReleases)
-.then(function(releases) {
-	console.log(releases.map(function(release) {
-		return release.artist + ': ' + release.title;
-	}));
-});
+.then(function(chosenReleases) {
+	console.log(chosenReleases.length);
+})
+
+.done();
 
 
 // ============================ Function definitions ===========================
+
+/**
+ * Constructs a function that logs an error and terminates. Useful for when 
+ * the program should stop after a (vital) promise is rejected.
+ * 
+ * @param  {*} exception The exception object (most likely an Error or string)
+ * @param  {String} description The description of the failed operation
+ * @return {Function} A new function that logs an error and terminates if called
+ */
+function terminate(description) {
+	return function(e) {
+		console.error('Error ' + description + ': ' + e);
+		process.exit();
+	};
+}
 
 // ----- Releases
 
@@ -106,46 +120,50 @@ function printReleases(releases) {
 }
 
 /**
- * TODO
- * @param  {[type]} releases [description]
- * @return {[type]}          [description]
+ * Constructs a promise that resolves with an array of chosen releases
+ * when the user has accepted/denied downloading each available release.
+ * @param  {Array} releases All releases that are available for downloading
+ * @return {Promise} A promise to return an array of chosen releases
  */
 function chooseReleases(releases) {
 	print();
 	print("Alright, let's choose from the releases.");
 
-	// Nope, doesn't work, we're prompting all at once. TODO ! ! !
-	var choosePromises = releases.map(function(release) {
-		return chooseRelease(release);
+	var chosenReleases = [];
+
+	var allPromises = releases.map(function(release) {
+		return function() {
+			return chooseRelease(chosenReleases, release);
+		};
 	});
 
-	return Q.allSettled(choosePromises)
-	.then(function(results) {
-		return results.map(function(result) {
-			return result.value;
-		}).filter(function(result) {
-			return !!result;
-		});
+	return allPromises.reduce(function(soFar, f) {
+		return soFar.then(f);
+	}, Q(null))
+	.then(function() {
+		return chosenReleases;
 	});
 }
 
 /**
- * TODO
- * @param  {[type]} release [description]
- * @return {[type]}         [description]
+ * Constructs a promise that resolves when the user has either accepted or
+ * denied downloading a given release. The promise does not resolve with any
+ * useful value; the "real" return value is the `chosenReleases` parameter!
+ * @param {Array} chosenReleases An array to add the release to if it was chosen
+ * @param {Object} release The release to be accepted/denied
+ * @return {Promise} A promise to resolve (not return anything!) when the user
+ * chose to either accept or deny downloading the release.
  */
-function chooseRelease(release) {
+function chooseRelease(chosenReleases, release) {
 	return Q.promise(function(resolve, reject) {
 		read({ prompt: 'Get ' + release.title + ' by ' + release.artist + '? (y/n)' },
 		function(err, choice) {
 			var doDownload = choice == 'y' ? true : (choice == 'n' ? false : null);
 			if(doDownload != null) {
 				if(doDownload) {
-					deferred.resolve(release);
+					chosenReleases.push(release);
 				}
-				else {
-					deferred.resolve(null);
-				}
+				resolve();
 			}
 			else { chooseRelease(); }
 		});
