@@ -122,7 +122,7 @@ function printReleases(releases) {
 
 /**
  * Constructs a promise that resolves with an array of chosen releases
- * when the user has accepted/denied downloading each available release.
+ * when the user has in-/excluded each available release.
  * @param  {Array} releases All releases that are available for downloading
  * @return {Promise} A promise to return an array of chosen releases
  */
@@ -136,10 +136,10 @@ function chooseReleases(releases) {
 }
 
 /**
- * TODO
- * @param  {[type]}   release  [description]
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
+ * Asks the user to include/exclude a release
+ * @param  {Object}   release  The release to in-/exclude
+ * @param  {Function} callback The callback function, called when the user has
+ * entered sensible input (y or n)
  */
 function chooseRelease(release, callback) {
 	read({ prompt: 'Get ' + release.title + ' by ' + release.artist + '? (y/n)' },
