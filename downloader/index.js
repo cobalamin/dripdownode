@@ -2,17 +2,21 @@ module.exports = {
 	login: login,
 	getSubscriptions: getSubscriptions,
 	getReleases: getReleases,
-	downloadReleases: downloadReleases
+	downloadRelease: downloadRelease,
+	releaseDlPath: releaseDlPath
 };
 
 var request = require('request'),
 	Q = require('q')
 	fs = require('fs'),
+	path = require('path');
 
-	urls = require('./endpoints');
+var urls = require('./endpoints');
+
+var DLPATH = './Downloads';
+if(!fs.existsSync(DLPATH)) { fs.mkdirSync(DLPATH); }
 
 var loginPromise = null;
-
 function login(email, password) {
 	if(loginPromise) return loginPromise;
 
@@ -69,21 +73,13 @@ function getReleases(subscription) {
 	});
 }
 
-function downloadReleases(releases) {
-	var promises = releases.map(function(release) {
-		return downloadRelease(release);
-	});
-
-	return Q.allSettled(promises);
-}
-
 function downloadRelease(release) {
 	return Q.promise(function(resolve, reject) {
 		login()
 		.then(function(res) {
 			var url = urls.downloadRelease(release, 'mp3'); // TODO formats
 
-			var fileWriteStream = fs.createWriteStream(release.slug + '.zip');
+			var fileWriteStream = fs.createWriteStream(releaseDlPath(release));
 			var req = request({
 				url: url,
 				strictSSL: true,
@@ -95,8 +91,22 @@ function downloadRelease(release) {
 			});
 
 			req.pipe(fileWriteStream);
+
+			req.on('end', function() {
+				req = null; 
+			});
+			fileWriteStream.on('finish', function() {
+				fileWriteStream.close();
+				fileWriteStream = null;
+			});
 		})
 	});
+}
+
+function releaseDlPath(release) {
+	var filename = release.artist + ' - ' + release.title;
+	filename = filename.replace(/[\/\\]/, '_'); // filter path separators
+	return path.join(DLPATH, filename + '.zip');
 }
 
 function getErrorMsg(msg, url) {

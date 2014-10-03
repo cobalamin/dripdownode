@@ -1,10 +1,9 @@
 var read = require('read'),
 	Q = require('q'),
-
-	dl = require('./downloader'),
-
 	_ = require('lodash-node/modern'),
-	async = require('async');
+	async = require('async'),
+
+	dl = require('./downloader');
 
 // Script-like alias
 var print = console.log;
@@ -53,7 +52,10 @@ login
 .then(printReleases, terminate('fetching releases'))
 .then(getAvailableReleases)
 .then(chooseReleases)
-//.then(downloadReleases)
+.then(downloadReleases)
+.then(function() {
+	print('ALL DONE! TIEM TO PLAY HALOS. LOLOLOLOLOLOLOL');
+})
 
 .done();
 
@@ -149,10 +151,23 @@ function getLockedReleases(releases) {
  */
 function chooseReleases(releases) {
 	print();
-	print("Alright, let's choose from the releases.");
 
 	return Q.Promise(function(resolve, reject, notify) {
-		async.filterSeries(releases, chooseRelease, resolve);
+		(function promptDownloadMode() {
+			read({ prompt: 'Get all releases, or choose the ones you want? (all/choose)' },
+			function(err, choice) {
+				var firstChar = choice.toLowerCase()[0];
+				if(firstChar == 'a') {
+					print("Alright, let's download all releases.")
+					resolve(releases);
+				}
+				else if(firstChar == 'c') {
+					print("Alright, let's choose which releases to download.");
+					async.filterSeries(releases, chooseRelease, resolve);
+				}
+				else { promptDownloadMode(); }
+			});
+		})();
 	});
 }
 
@@ -163,7 +178,7 @@ function chooseReleases(releases) {
  * entered sensible input (y or n)
  */
 function chooseRelease(release, callback) {
-	read({ prompt: 'Get ' + release.title + ' by ' + release.artist + '? (y/n)' },
+	read({ prompt: 'Get ' + getReleaseName(release) + '? (y/n)' },
 	function(err, choice) {
 		choice = choice.trim().toLowerCase();
 		var doDownload = choice === 'y' ? true : (choice === 'n' ? false : null);
@@ -173,6 +188,39 @@ function chooseRelease(release, callback) {
 		else {
 			chooseRelease(release, callback);
 		}
+	});
+}
+
+function downloadReleases(releases) {
+	print();
+	print('Please wait while I get you ' + releases.length + ' releases.');
+
+	return Q.promise(function(resolve, reject, notify) {
+		var downloadQueue = async.queue(function(release, callback) {
+			dl.downloadRelease(release)
+			.then(function() { callback(); })
+			.fail(function(err) { callback(err); });
+		}, 5);
+
+		releases.forEach(function(release) {
+			var releaseName = getReleaseName(release);
+
+			fs.exists(dl.releaseDlPath(release), function(exists) {
+				if(!exists) {
+					downloadQueue.push(release, function downloadCallback(err) {
+						if(!err) { print('Finished downloading ' + releaseName); }
+						else { print('Error downloading ' + releaseName + ': ' + err); }
+					});
+				}
+				else {
+					print('You already have ' + releaseName + ', skipping download.');
+				}
+			});
+		});
+
+		downloadQueue.drain = function() {
+			resolve(releases);
+		};
 	});
 }
 
@@ -244,4 +292,8 @@ function printUnderline(str, underlineChar) {
 		.map(function() { return underlineChar; })
 		.join('')
 	);
+}
+
+function getReleaseName(release) {
+	return '"' + release.title + '" by ' + release.artist;
 }
