@@ -53,9 +53,7 @@ login
 .then(printReleases, terminate('fetching releases'))
 .then(getAvailableReleases)
 .then(chooseReleases)
-.then(function(chosenReleases) {
-	console.log(chosenReleases.length);
-})
+//.then(downloadReleases)
 
 .done();
 
@@ -120,6 +118,29 @@ function printReleases(releases) {
 	return releases;
 }
 
+// Gets the upcoming (not yet released) releases
+function getUpcomingReleases(releases) {
+	return releases.filter(function(release) {
+		// Interesting naming, drip.fm!
+		return release.state !== 'syndicated';
+	});
+}
+// Gets the published (released, technically available) releases
+function getPublishedReleases(releases) {
+	return _.difference(releases, getUpcomingReleases(releases));
+}
+// Gets the available (published and unlocked) releases
+function getAvailableReleases(releases) {
+	return getPublishedReleases(releases).filter(function(release) {
+		return release.unlocked;
+	});
+}
+// Gets the locked releases
+function getLockedReleases(releases) {
+	return _.difference(getPublishedReleases(releases),
+		getAvailableReleases(releases));
+}
+
 /**
  * Constructs a promise that resolves with an array of chosen releases
  * when the user has in-/excluded each available release.
@@ -153,32 +174,6 @@ function chooseRelease(release, callback) {
 			chooseRelease(release, callback);
 		}
 	});
-}
-
-// Gets the upcoming (not yet released) releases
-function getUpcomingReleases(releases) {
-	return releases.filter(function(release) {
-		// Interesting naming, drip.fm!
-		return release.state !== 'syndicated';
-	});
-}
-
-// Gets the published (released, technically available) releases
-function getPublishedReleases(releases) {
-	return _.difference(releases, getUpcomingReleases(releases));
-}
-
-// Gets the available (published and unlocked) releases
-function getAvailableReleases(releases) {
-	return getPublishedReleases(releases).filter(function(release) {
-		return release.unlocked;
-	});
-}
-
-// Gets the locked releases
-function getLockedReleases(releases) {
-	return _.difference(getPublishedReleases(releases),
-		getAvailableReleases(releases));
 }
 
 // ----- Subscriptions
