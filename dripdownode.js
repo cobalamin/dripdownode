@@ -238,11 +238,12 @@ function setUserData(response) {
 
 /**
  * Prints a string with the same length as the given string, filled with
- * characters (e.g. =) to underline the string
- * @param  {String} str The string to underline
+ * characters to form an underline
+ * @param {String} str The string to underline
+ * @param {String} underlineChar the character to underline with. '=' by default
  */
-function printUnderline(str) {
-	var underlineChar = '=';
+function printUnderline(str, underlineChar) {
+	underlineChar = underlineChar || '=';
 	print(
 		Array.apply(null, { length: str.length })
 		.map(function() { return underlineChar; })
