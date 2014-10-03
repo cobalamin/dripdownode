@@ -3,7 +3,8 @@ var read = require('read'),
 
 	dl = require('./downloader'),
 
-	_ = require('lodash-node/modern');
+	_ = require('lodash-node/modern'),
+	async = require('async');
 
 // Script-like alias
 var print = console.log;
@@ -129,44 +130,28 @@ function chooseReleases(releases) {
 	print();
 	print("Alright, let's choose from the releases.");
 
-	var chosenReleases = [];
-
-	var allPromises = releases.map(function(release) {
-		return function() {
-			return chooseRelease(chosenReleases, release);
-		};
-	});
-
-	return allPromises.reduce(function(soFar, f) {
-		return soFar.then(f);
-	}, Q(null))
-	.then(function() {
-		return chosenReleases;
+	return Q.Promise(function(resolve, reject, notify) {
+		async.filterSeries(releases, chooseRelease, resolve);
 	});
 }
 
 /**
- * Constructs a promise that resolves when the user has either accepted or
- * denied downloading a given release. The promise does not resolve with any
- * useful value; the "real" return value is the `chosenReleases` parameter!
- * @param {Array} chosenReleases An array to add the release to if it was chosen
- * @param {Object} release The release to be accepted/denied
- * @return {Promise} A promise to resolve (not return anything!) when the user
- * chose to either accept or deny downloading the release.
+ * TODO
+ * @param  {[type]}   release  [description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
  */
-function chooseRelease(chosenReleases, release) {
-	return Q.promise(function(resolve, reject) {
-		read({ prompt: 'Get ' + release.title + ' by ' + release.artist + '? (y/n)' },
-		function(err, choice) {
-			var doDownload = choice == 'y' ? true : (choice == 'n' ? false : null);
-			if(doDownload != null) {
-				if(doDownload) {
-					chosenReleases.push(release);
-				}
-				resolve();
-			}
-			else { chooseRelease(); }
-		});
+function chooseRelease(release, callback) {
+	read({ prompt: 'Get ' + release.title + ' by ' + release.artist + '? (y/n)' },
+	function(err, choice) {
+		choice = choice.trim().toLowerCase();
+		var doDownload = choice === 'y' ? true : (choice === 'n' ? false : null);
+		if(doDownload != null) {
+			callback(doDownload);
+		}
+		else {
+			chooseRelease(release, callback);
+		}
 	});
 }
 
