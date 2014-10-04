@@ -2,7 +2,8 @@ var request = require('request')
 	, Q = require('q')
 	, fs = require('fs')
 	, path = require('path')
-	, urls = require('./endpoints');
+	, urls = require('./endpoints')
+	, _ = require('lodash-node/modern');
 
 module.exports = {
 	login: login,
@@ -19,7 +20,7 @@ var loginPromise = null;
 function login(email, password) {
 	if(loginPromise) return loginPromise;
 
-	loginPromise = Q.Promise(function(resolve, reject, notify) {
+	loginPromise = Q.Promise(function(resolve, reject) {
 		request.post({
 			url: urls.login,
 			json: { email: email, password: password },
@@ -47,31 +48,51 @@ function getSubscriptions() {
 	return login()
 	.then(function(res) {
 		return res.data.memberships;
-	}, function(err) { throw err; });
+	}, function(err) { reject(err) });
 }
 
-function getReleases(subscription) {
-	// TODO fetch all releases (they're paged to 20). See `set_releases` inside
-	// the original drip-downloader script for this
+function getReleases(subscriptionOrId) {
 	return Q.promise(function(resolve, reject) {
 		login()
 		.then(function(res) {
-			var url = urls.releases(subscription.creative);
-			request.get({
-				url: url,
-				json: true,
-				strictSSL: true,
-				headers: { "Cookie": res.cookie }
-			}, function getReleasesCb(err, msg, body) {
-				if(!err && msg.statusCode < 400) {
-					resolve(body);
-				}
-				else {
-					reject(err || getErrorMsg(msg, url));
-				}
-			});
-		});
+			var subscription = _.find(res.data.memberships,
+				{ id: Number(subscriptionOrId) });
+			if(!subscription) {
+				reject(new Error('No such subscription found'));
+				return;
+			}
+
+			var allReleases = [];
+			(function getReleases(page) {
+				page = Number(page);
+
+				var url = urls.releases(subscription.creative, page);
+				request.get({
+					url: url,
+					json: true,
+					strictSSL: true,
+					headers: { "Cookie": res.cookie }
+				}, function getReleasesCb(err, msg, body) {
+					if(!err && msg.statusCode < 400) {
+						// There are remaining releases, add them
+						if(body.length) {
+							Array.prototype.push.apply(allReleases, body);
+							getReleases(page + 1);
+						}
+						// There are no remaining releases, resolve
+						else {
+							resolve(allReleases);
+						}
+					}
+					else {
+						reject(err || getErrorMsg(msg, url));
+					}
+				});
+			})(1);
+		}, function(err) { reject(err) });
 	});
+
+	
 }
 
 function downloadRelease(release) {
@@ -114,7 +135,7 @@ function downloadRelease(release) {
 				fileWriteStream.close();
 				fileWriteStream = null;
 			});
-		});
+		}, function(err) { reject(err) });
 	});
 }
 

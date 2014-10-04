@@ -270,7 +270,7 @@ function chooseSubscription(subscriptions) {
 			function(err, index) {
 				chosenIdx = Number(index) - 1;
 				chosenSub = subscriptions[chosenIdx];
-				if(chosenSub) { resolve(chosenSub); }
+				if(chosenSub) { resolve(chosenSub.id); }
 				else { chooseSubscription(); }
 			});
 		})();
