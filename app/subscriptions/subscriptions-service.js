@@ -1,11 +1,9 @@
 angular.module('dripdownode')
-.factory('SubscriptionsService', ['SocketService', '$q',
-function(socketSvc, $q) {
+.factory('SubscriptionsService', ['$http',
+function(socketSvc, $http) {
 	return {
 		getSubscriptions: getSubscriptions
 	};
 
-	function getSubscriptions() {
-		return socketSvc.get('subscriptions');
-	}
+	function getSubscriptions() { throw 'todo'; }
 }]);

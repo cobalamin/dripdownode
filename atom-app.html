@@ -23,11 +23,15 @@
 	<script src="dist/app.js"></script>
 	<link rel="stylesheet" href="dist/app.css">
 </head>
-<body ng-app="dripdownode">
-	<ul id="subscriptions" ng-controller="SubscriptionsController as subsCtrl">
-		<li ng-repeat="sub in subsCtrl.subscriptions">
-			{{sub}}
-		</li>
-	</ul>
+<body ng-app="dripdownode" ng-controller="MainController as mainCtrl">
+	<div ng-hide="mainCtrl.loggedIn">
+		<form>
+			<input type="text" placeholder="Your drip.fm email"
+				ng-model="mainCtrl.user.email">
+			<input type="password" placeholder="Your drip.fm password"
+				ng-model="mainCtrl.user.password">
+			<button ng-click="mainCtrl.login()">Log in!</button>
+		</form>
+	</div>
 </body>
 </html>

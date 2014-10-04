@@ -1,3 +1,9 @@
+var request = require('request')
+	, Q = require('q')
+	, fs = require('fs')
+	, path = require('path')
+	, urls = require('./endpoints');
+
 module.exports = {
 	login: login,
 	getSubscriptions: getSubscriptions,
@@ -6,14 +12,7 @@ module.exports = {
 	releaseDlPath: releaseDlPath
 };
 
-var request = require('request'),
-	Q = require('q'),
-	fs = require('fs'),
-	path = require('path');
-
-var urls = require('./endpoints');
-
-var DLPATH = './Downloads';
+var DLPATH = path.join(GLOBAL.proj_root, 'Downloads');
 if(!fs.existsSync(DLPATH)) { fs.mkdirSync(DLPATH); }
 
 var loginPromise = null;

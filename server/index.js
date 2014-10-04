@@ -1,12 +1,10 @@
 var express = require('express')
 	, app = express()
 	, http = require('http').Server(app)
-	, io = require('socket.io')(http)
-	, socket = require('./socket')
 	, Q = require('q')
 	, path = require('path');
 
-var ROOT = path.resolve(__dirname + '/../')
+var ROOT = GLOBAL.proj_root
 	, SENDFILE_OPTS = { root: ROOT }
 	, PORT = 55221
 	, START_TIMEOUT = 5;
@@ -17,8 +15,6 @@ app.use('/fonts', express.static(ROOT + '/fonts'));
 app.get('/', function(req, res) {
 	res.sendFile('atom-app.html', SENDFILE_OPTS);
 });
-
-io.on('connection', socket.setUpListeners);
 
 module.exports = {
 	start: function startServer() {

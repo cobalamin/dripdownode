@@ -1,3 +1,5 @@
+GLOBAL.proj_root = __dirname;
+
 var crash_reporter = require('crash-reporter')
 	, app = require('app')
 	, BrowserWindow = require('browser-window');
