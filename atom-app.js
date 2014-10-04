@@ -16,6 +16,7 @@ app.on('ready', function() {
 	mainWindow = new BrowserWindow({ width: 1024, height: 768 });
 	mainWindow.on('closed', function() { mainWindow = null; });
 
+	mainWindow.loadUrl('file://' + __dirname + '/server/static/loading.html');
 	require('./server').start()
 	.then(function(httpServer) {
 		// Save server object, to close it later
@@ -27,7 +28,7 @@ app.on('ready', function() {
 	}, function(error) {
 		console.log(error);
 		// Load error page and send error message to it
-		mainWindow.loadUrl('file://' + __dirname + '/server/error.html');
+		mainWindow.loadUrl('file://' + __dirname + '/server/static/error.html');
 		mainWindow.webContents.on('did-finish-load', function() {
 			mainWindow.webContents.send('error-message', error);
 		});
