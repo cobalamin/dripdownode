@@ -74,7 +74,7 @@ function getReleases(subscription) {
 }
 
 function downloadRelease(release) {
-	return Q.promise(function(resolve, reject) {
+	return Q.promise(function(resolve, reject, notify) {
 		login()
 		.then(function(res) {
 			var url = urls.downloadRelease(release, 'mp3'); // TODO formats
@@ -92,8 +92,22 @@ function downloadRelease(release) {
 
 			req.pipe(fileWriteStream);
 
+			req.on('response', function(response) {
+				var totalLength = parseInt(response.headers['content-length'], 10),
+					receivedLength = 0,
+					completed = 0;
+
+				response.on('data', function(data) {
+					receivedLength += data.length;
+					completed = receivedLength / totalLength;
+
+					notify(completed);
+				});
+			});
+
 			req.on('end', function() {
-				req = null; 
+				req.removeAllListeners();
+				req = null;
 			});
 			fileWriteStream.on('finish', function() {
 				fileWriteStream.close();

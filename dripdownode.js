@@ -197,9 +197,21 @@ function downloadReleases(releases) {
 
 	return Q.promise(function(resolve, reject, notify) {
 		var downloadQueue = async.queue(function(release, callback) {
+			var prevProgress = 0,
+				progressInTens = 0,
+				releaseName = getReleaseName(release);
+
 			dl.downloadRelease(release)
-			.then(function() { callback(); })
-			.fail(function(err) { callback(err); });
+			.then(function() { callback(); },
+				function(err) { callback(err); },
+				function(progress) {
+					progress = +progress;
+					progressInTens = (progress * 10) | 0;
+					if(progressInTens != prevProgress) {
+						prevProgress = progressInTens;
+						console.log(progressInTens * 10 + '% of ' + releaseName);
+					}
+				});
 		}, 5);
 
 		releases.forEach(function(release) {
