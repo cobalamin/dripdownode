@@ -6,20 +6,26 @@
 	<!-- Angular -->
 	<script src="components/angular/angular.min.js"></script>
 	<!-- jQuery - see https://github.com/atom/atom-shell/issues/254 -->
-	<script>window.$ = window.jQuery = require('./components/jquery/dist/jquery');</script>
+	<script>
+		window.$ =
+		window.jQuery =
+			require(process.cwd() + '/components/jquery/dist/jquery');
+	</script>
 	<!-- Vex -->
 	<script src="components/vex/js/vex.combined.min.js"></script>
 	<script>vex.defaultOptions.className = 'vex-theme-plain';</script>
 	<link rel="stylesheet" href="components/vex/css/vex.css">
 	<link rel="stylesheet" href="components/vex/css/vex-theme-plain.css">
+	<!-- Socket.IO -->
+	<script src="/socket.io/socket.io.js"></script>
 
 	<!-- Own code -->
 	<script src="dist/app.js"></script>
 	<link rel="stylesheet" href="dist/app.css">
 </head>
 <body ng-app="dripdownode">
-	<ul id="subscriptions" ng-controller="SubscriptionsCtrl as subCtrl">
-		<li ng-repeat="sub in subCtrl.subscriptions">
+	<ul id="subscriptions" ng-controller="SubscriptionsController as subsCtrl">
+		<li ng-repeat="sub in subsCtrl.subscriptions">
 			{{sub}}
 		</li>
 	</ul>
