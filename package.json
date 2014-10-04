@@ -2,7 +2,7 @@
   "name": "dripdownode",
   "version": "0.0.0",
   "description": "A node-based tool to fetch and unpack releases from drip.fm. If used with atom-shell, provides a nice GUI",
-  "main": "index.js",
+  "main": "atom-app.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/pommesgabel/dripdownode.git"

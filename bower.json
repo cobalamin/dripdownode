@@ -1,0 +1,23 @@
+{
+  "name": "dripdownode",
+  "main": "atom-app.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/pommesgabel/dripdownode",
+  "authors": [
+    "Simon Welker <simon.welker@outlook.com>"
+  ],
+  "description": "A node-based tool to fetch and unpack releases from drip.fm. If used with atom-shell, provides a nice GUI",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.26",
+    "vex": "~2.2.1",
+    "jquery": "~2.1.1"
+  }
+}
