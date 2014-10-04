@@ -8,7 +8,7 @@ var read = require('read'),
 // Script-like alias
 var print = console.log;
 
-const DISCLAIMER =
+var DISCLAIMER =
 "/==============================================================================\\\n" +
 "|                                  DISCLAIMER                                  |\n" +
 "|==============================================================================|\n" +
@@ -158,7 +158,7 @@ function chooseReleases(releases) {
 			function(err, choice) {
 				var firstChar = choice.toLowerCase()[0];
 				if(firstChar == 'a') {
-					print("Alright, let's download all releases.")
+					print("Alright, let's download all releases.");
 					resolve(releases);
 				}
 				else if(firstChar == 'c') {
@@ -182,7 +182,7 @@ function chooseRelease(release, callback) {
 	function(err, choice) {
 		choice = choice.trim().toLowerCase();
 		var doDownload = choice === 'y' ? true : (choice === 'n' ? false : null);
-		if(doDownload != null) {
+		if(doDownload !== null) {
 			callback(doDownload);
 		}
 		else {

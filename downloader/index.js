@@ -7,7 +7,7 @@ module.exports = {
 };
 
 var request = require('request'),
-	Q = require('q')
+	Q = require('q'),
 	fs = require('fs'),
 	path = require('path');
 
@@ -20,7 +20,7 @@ var loginPromise = null;
 function login(email, password) {
 	if(loginPromise) return loginPromise;
 
-	return loginPromise = Q.Promise(function(resolve, reject, notify) {
+	loginPromise = Q.Promise(function(resolve, reject, notify) {
 		request.post({
 			url: urls.login,
 			json: { email: email, password: password },
@@ -40,6 +40,8 @@ function login(email, password) {
 			}
 		});
 	});
+
+	return loginPromise;
 }
 
 function getSubscriptions() {
@@ -113,7 +115,7 @@ function downloadRelease(release) {
 				fileWriteStream.close();
 				fileWriteStream = null;
 			});
-		})
+		});
 	});
 }
 
