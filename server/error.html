@@ -5,5 +5,11 @@
 </head>
 <body>
 	<h1>An error occurred while starting up the app :(</h1>
+	<pre id="error-text"></pre>
+	<script>
+		require('ipc').on('error-message', function(errorMsg) {
+			document.querySelector('#error-text').innerHTML = errorMsg;
+		});
+	</script>
 </body>
 </html>

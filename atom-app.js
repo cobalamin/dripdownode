@@ -1,45 +1,40 @@
-var crash_reporter = require('crash-reporter');
+var crash_reporter = require('crash-reporter')
+	, app = require('app')
+	, BrowserWindow = require('browser-window');
+
 crash_reporter.start();
 
 // -----
 
-var mainWindow = null;
-var DEV = true;
+var mainWindow = null
+	, DEV = true
+	, server = null;
 
-var server = null,
-	serverError = false;
+// Wait for app to be ready
+app.on('ready', function() {
+	// Initialise window
+	mainWindow = new BrowserWindow({ width: 1024, height: 768 });
+	mainWindow.on('closed', function() { mainWindow = null; });
 
-require('./server').start()
-.then(function(httpServer) {
-	server = httpServer;
-	serverError = false;
-}, function(error) {
-	serverError = error;
-})
-.then(function startApp() {
-
-});
-
-var app = require('app'),
-	BrowserWindow = require('browser-window');
-
-app.on('ready', function appOnReady() {
-	if(!serverError) {
-		mainWindow = new BrowserWindow({ width: 1024, height: 768 });
+	require('./server').start()
+	.then(function(httpServer) {
+		// Save server object, to close it later
+		server = httpServer;
+		// Load the main page from the server
 		mainWindow.loadUrl('http://localhost:55221/');
-		mainWindow.on('closed', function() { mainWindow = null; });
-
+		// Automatically open dev tools if we're in dev mode
 		if(DEV) mainWindow.toggleDevTools();
-	}
-	else {
-		mainWindow = new BrowserWindow({ width: 800, height: 600 });
+	}, function(error) {
+		console.log(error);
+		// Load error page and send error message to it
 		mainWindow.loadUrl('file://' + __dirname + '/server/error.html');
-		mainWindow.on('closed', function() { mainWindow = null; });
-	}
+		mainWindow.webContents.on('did-finish-load', function() {
+			mainWindow.webContents.send('error-message', error);
+		});
+	});
 });
 
 app.on('window-all-closed', function() {
-	var server = serverStartResult && serverStartResult.server;
 	if(server) server.close();
 	app.quit();
 });
