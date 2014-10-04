@@ -12,8 +12,16 @@
 	<script>vex.defaultOptions.className = 'vex-theme-plain';</script>
 	<link rel="stylesheet" href="components/vex/css/vex.css">
 	<link rel="stylesheet" href="components/vex/css/vex-theme-plain.css">
+
+	<!-- Own code -->
+	<script src="dist/app.js"></script>
+	<link rel="stylesheet" href="dist/app.css">
 </head>
 <body ng-app="dripdownode">
-	
+	<ul id="subscriptions" ng-controller="SubscriptionsCtrl as subCtrl">
+		<li ng-repeat="sub in subCtrl.subscriptions">
+			{{sub}}
+		</li>
+	</ul>
 </body>
 </html>
