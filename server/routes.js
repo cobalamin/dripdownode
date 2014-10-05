@@ -10,17 +10,17 @@ module.exports = function addRoutesToApp(app) {
 	var loggedIn = false;
 
 	app.post('/api/login', function(req, res) {
-		var email = req.param('email')
-			, password = req.param('password');
+		var email = req.body.email
+			, password = req.body.password;
 
-			downloader.login(email, password)
-			.then(function loginSuccess() {
-				loggedIn = true;
-				res.status(200).end();
-			}, function loginFailure() {
-				loggedIn = false;
-				res.status(401).end();
-			});
+		downloader.login(email, password)
+		.then(function loginSuccess(response) {
+			loggedIn = true;
+			res.status(200).json(response.data);
+		}, function loginFailure() {
+			loggedIn = false;
+			res.status(401).end();
+		});
 	});
 
 	// Use the RegExp constructor instead of literal form, because we'd have to

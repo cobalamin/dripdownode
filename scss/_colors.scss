@@ -1,0 +1,18 @@
+// First, define your color settings. The variable names are important!
+$hue: 'indigo';
+$indices: (
+	'primary': 500,
+	'dark': 700,
+	'light': 100
+);
+
+$accent-hue: 'pink';
+$accent-indices: (
+	'primary': 'A200',
+	'fallback1': 'A100',
+	'fallback2': 'A400'
+);
+
+// Then import the functions and mixins
+@import "../components/google-colors/color_functions";
+@import "../components/google-colors/color_mixins";

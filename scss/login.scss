@@ -1,0 +1,26 @@
+#login-overlay {
+	position: fixed;
+	top: 0; left: 0;
+	width: 100%; height: 100%;
+	background: rgba(0, 0, 0, 0.3);
+}
+#login-vcenter {
+	@extend %vcenter-container;
+	width: 100%; height: 100%;
+}
+#login-wrapper {
+	@extend %vcenter;
+}
+
+#login-modal {
+	margin: 0 auto;
+	max-width: 400px;
+	padding: 30px;
+
+	background: white;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+	h1 {
+		margin: 0 0 $whitespace 0;
+	}
+}

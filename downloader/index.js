@@ -18,7 +18,9 @@ if(!fs.existsSync(DLPATH)) { fs.mkdirSync(DLPATH); }
 
 var loginPromise = null;
 function login(email, password) {
-	if(loginPromise) return loginPromise;
+	if(loginPromise && loginPromise.state === 'fulfilled') {
+		return loginPromise;
+	}
 
 	loginPromise = Q.Promise(function(resolve, reject) {
 		request.post({
