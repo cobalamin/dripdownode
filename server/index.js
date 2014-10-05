@@ -26,7 +26,8 @@ module.exports = {
 				reject('Server did not start within ' + START_TIMEOUT + ' seconds');
 			}, START_TIMEOUT * 1000);
 
-			http.listen(PORT, function() {
+			http.listen(PORT, 'localhost');
+			http.on('listening', function() {
 				clearTimeout(timeout);
 				console.log('Server listening on port %s', PORT);
 				resolve(http);
