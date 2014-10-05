@@ -17,6 +17,7 @@ var SPINNER_OPTS = {
 	left: '50%' // Left position relative to parent
 };
 
-$(function() {
-	$('#spinner-overlay').spin(SPINNER_OPTS);
+document.addEventListener('DOMContentLoaded', function() {
+	var spinner = new Spinner(SPINNER_OPTS)
+		.spin(document.getElementById('spinner-overlay'));
 });

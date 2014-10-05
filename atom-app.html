@@ -5,27 +5,17 @@
 
 	<!-- Angular -->
 	<script src="components/angular/angular.min.js"></script>
-	<!-- jQuery - see https://github.com/atom/atom-shell/issues/254 -->
-	<script>
-		window.$ =
-		window.jQuery =
-			require(process.cwd() + '/components/jquery/dist/jquery');
-	</script>
-	<!-- Vex -->
-	<script src="components/vex/js/vex.combined.min.js"></script>
-	<script>vex.defaultOptions.className = 'vex-theme-plain';</script>
-	<link rel="stylesheet" href="components/vex/css/vex.css">
-	<link rel="stylesheet" href="components/vex/css/vex-theme-plain.css">
 	<!-- Spinner -->
 	<script src="components/spinjs/spin.js"></script>
-	<script src="components/spinjs/jquery.spin.js"></script>
 
 	<!-- Own code -->
 	<script src="dist/app.js"></script>
 	<link rel="stylesheet" href="dist/app.css">
 </head>
 <body ng-app="dripdownode" ng-controller="MainController as ctrl">
-	<div id="spinner-overlay" ng-show="ctrl.loading"></div>
+	<div id="spinner-overlay" ng-hide="ctrl.loading">
+		<div id="spinner-message">Loading some shiz</div>
+	</div>
 	<div id="login-overlay" ng-hide="ctrl.user.loggedIn">
 		<div id="login-vcenter">
 			<div id="login-wrapper">
