@@ -1,26 +1,24 @@
 angular.module('dripdownode')
-.controller('MainController', ['$rootScope', 'ServerService',
-function subscriptionsController($rootScope, server) {
+.controller('MainController', ['$rootScope', '$scope', 'ServerService',
+function subscriptionsController($rootScope, $scope, server) {
 	var ctrl = this;
 
 	// =============================== State & Init ==============================
 
-	ctrl.user = {
-		email: '',
-		password: '',
-		data: {}
-	};
-
-	// Login state and message
-	ctrl.loggedIn = false;
-	ctrl.loginMsg = '';
-
 	// Loading state and message
-	ctrl.loading = false;
-	ctrl.loadingMessage = '';
+	$scope.loading = false;
+	$scope.loadingMessage = '';
 
+	// User / Login state
+	$scope.user = {
+		email: '',
+		password: ''
+	};
+	// Login state and message
+	$scope.loggedIn = false;
+	$scope.loginMsg = '';
 	// Have we fetched the login state from the server?
-	ctrl.loginStateFetched = false;
+	$scope.loginStateFetched = false;
 
 	// Get current login state from the server
 	(function getLoginState() {
@@ -28,18 +26,14 @@ function subscriptionsController($rootScope, server) {
 		setLoadingMessage('Fetching login state...');
 
 		server.getLoginState()
-		.success(function(data) {
-			setLoginState(true);
-			ctrl.user.data = data;
-		})
+		.success(setUserData)
 		.error(function(response) {
-			// Don't set login message here yet, as it's only a 'response' to
-			// direct user action (like entering and submitting login data)
 			setLoginState(false);
+			setLoginMessage("Please log in.");
 		})
 		.finally(function() {
 			setLoadingState(false);
-			ctrl.loginStateFetched = true;
+			$scope.loginStateFetched = true;
 		});
 	})();
 
@@ -59,16 +53,13 @@ function subscriptionsController($rootScope, server) {
 		setLoadingState(true);
 		setLoadingMessage('Tryna log you in...');
 
-		var email = ctrl.user.email, password = ctrl.user.password;
+		var email = $scope.user.email,
+			password = $scope.user.password;
 		// Set password to empty, we don't want to store it on the user object
-		ctrl.user.password = '';
+		$scope.user.password = '';
 
 		return server.login(email, password)
-		.success(function(userData) {
-			ctrl.user.data = userData;
-			setLoginState(true);
-			setLoginMessage('');
-		})
+		.success(setUserData)
 		.error(function(response, status) {
 			setLoginState(false);
 			setLoginMessage(response.error || 'Error while logging in');
@@ -78,19 +69,25 @@ function subscriptionsController($rootScope, server) {
 		});
 	}
 
+	function setUserData(data) {
+		setLoginState(true);
+		setLoginMessage('');
+		$scope.userData = data;
+	}
+
 	function setLoginState(state) {
-		ctrl.loggedIn = !!state;
+		$scope.loggedIn = !!state;
 		if(!state) { setLoginMessage(''); }
 	}
 	function setLoginMessage(message) {
-		ctrl.loginMsg = String(message);
+		$scope.loginMsg = String(message);
 	}
 
 	function setLoadingState(state) {
-		ctrl.loading = !!state;
+		$scope.loading = !!state;
 		if(!state) { setLoadingMessage(''); }
 	}
 	function setLoadingMessage(message) {
-		ctrl.loadingMsg = String(message);
+		$scope.loadingMsg = String(message);
 	}
 }]);

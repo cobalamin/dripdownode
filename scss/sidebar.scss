@@ -1,0 +1,37 @@
+$subs-height: 30px;
+$sidebar-whitespace: 10px;
+
+.subscription {
+	box-sizing: initial;
+	height: $subs-height;
+	line-height: $subs-height;
+
+	font-family: "Roboto Condensed";
+	cursor: pointer;
+
+	white-space: nowrap;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+
+	&:hover {
+		@include colors-accent;
+	}
+	&.active {
+		@include colors-accent2;
+	}
+
+	.subscription-thumb {
+		float: left;
+
+		width: auto;
+		height: $subs-height;
+
+		margin-right: $sidebar-whitespace;
+	}
+
+	padding: $sidebar-whitespace $whitespace;
+}
+
+.sidebar-text {
+	padding: 0 $whitespace;
+}

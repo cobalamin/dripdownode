@@ -1,10 +1,31 @@
-// The main content container
-#content {
+$sidebar-width: 300px;
+
+// The outer container
+#container {
 	@extend %clearfix;
-	border: 2px solid #f00;
+	height: 100%;
+}
+
+#sidebar, #content {
+	height: 100%;
+	overflow-y: auto;
+}
+
+// The sidebar
+#sidebar {
+	float: left;
+
+	width: $sidebar-width;
+
+	@include colors-primary;
+
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+// The content
+#content {
+	float: left;
 	padding: $whitespace;
 
-	#sidebar {
-		float: left;
-	}
+	width: calc(100% - #{$sidebar-width});
 }
