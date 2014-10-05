@@ -51,12 +51,12 @@ function getSubscriptions() {
 	}, function(err) { reject(err) });
 }
 
-function getReleases(subscriptionOrId) {
+function getReleases(subscriptionID) {
 	return Q.promise(function(resolve, reject) {
 		login()
 		.then(function(res) {
 			var subscription = _.find(res.data.memberships,
-				{ id: Number(subscriptionOrId) });
+				{ id: Number(subscriptionID) });
 			if(!subscription) {
 				reject(new Error('No such subscription found'));
 				return;
@@ -81,7 +81,7 @@ function getReleases(subscriptionOrId) {
 						}
 						// There are no remaining releases, resolve
 						else {
-							resolve(allReleases);
+							resolve(getReleasesObject(allReleases));
 						}
 					}
 					else {
@@ -91,8 +91,34 @@ function getReleases(subscriptionOrId) {
 			})(1);
 		}, function(err) { reject(err) });
 	});
+}
 
-	
+function getReleasesObject(releases) {
+	return {
+		available: getAvailable(releases)
+		, upcoming: getUpcoming(releases)
+		, locked: getLocked(releases)
+	};
+
+	// Gets the upcoming (not yet released) releases
+	function getUpcoming(releases) {
+		return _.filter(releases, function(release) {
+			// Interesting naming, drip.fm!
+			return release.state !== 'syndicated';
+		});
+	}
+	// Gets the published (released, technically available) releases
+	function getPublished(releases) {
+		return _.difference(releases, getUpcoming(releases));
+	}
+	// Gets the available (published and unlocked) releases
+	function getAvailable(releases) {
+		return _.filter(getPublished(releases), 'unlocked');
+	}
+	// Gets the locked releases
+	function getLocked(releases) {
+		return _.difference(getPublished(releases), getAvailable(releases));
+	}
 }
 
 function downloadRelease(release) {
