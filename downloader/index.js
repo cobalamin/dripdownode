@@ -22,9 +22,8 @@ if(!fs.existsSync(DLPATH)) { fs.mkdirSync(DLPATH); }
 var loginPromise = null;
 
 function login(email, password) {
-	if(!email || !password) {
-		return Q.reject("Email or password omitted");
-	}
+	if(!email) { return Q.reject("Email can't be blank!"); }
+	else if(!password) { return Q.reject("Password can't be blank!"); }
 
 	loginPromise = Q.Promise(function(resolve, reject) {
 		request.post({
@@ -42,7 +41,7 @@ function login(email, password) {
 				});
 			}
 			else {
-				reject(err || body.errors);
+				reject(err || body.errors[0]);
 			}
 		});
 	});

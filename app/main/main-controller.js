@@ -31,7 +31,10 @@ function subscriptionsController($rootScope, server) {
 		.success(function(data) {
 			setLoginState(true);
 			ctrl.user.data = data;
-		}, function() {
+		})
+		.error(function(response) {
+			// Don't set login message here yet, as it's only a 'response' to
+			// direct user action (like entering and submitting login data)
 			setLoginState(false);
 		})
 		.finally(function() {
@@ -66,19 +69,18 @@ function subscriptionsController($rootScope, server) {
 			setLoginState(true);
 			setLoginMessage('');
 		})
-		.error(function(data, status) {
+		.error(function(response, status) {
 			setLoginState(false);
-			if(status == 401) { setLoginMessage('Wrong email or password'); }
-			else { setLoginMessage('Error while logging in'); }
+			setLoginMessage(response.error || 'Error while logging in');
 		})
 		.finally(function() {
 			setLoadingState(false);
-			getSubscriptions();
 		});
 	}
 
 	function setLoginState(state) {
 		ctrl.loggedIn = !!state;
+		if(!state) { setLoginMessage(''); }
 	}
 	function setLoginMessage(message) {
 		ctrl.loginMsg = String(message);
@@ -86,6 +88,7 @@ function subscriptionsController($rootScope, server) {
 
 	function setLoadingState(state) {
 		ctrl.loading = !!state;
+		if(!state) { setLoadingMessage(''); }
 	}
 	function setLoadingMessage(message) {
 		ctrl.loadingMsg = String(message);

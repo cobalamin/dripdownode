@@ -13,8 +13,8 @@ module.exports = function addRoutesToApp(app) {
 		downloader.getLoginState()
 		.then(function isLoggedIn(loginState) {
 			res.json(loginState.data);
-		}, function isNotLoggedIn() {
-			res.status(401).end();
+		}, function isNotLoggedIn(reason) {
+			res.status(401).json({ error: reason });
 		});
 	});
 
@@ -26,9 +26,9 @@ module.exports = function addRoutesToApp(app) {
 		.then(function loginSuccess(response) {
 			loggedIn = true;
 			res.json(response.data);
-		}, function loginFailure() {
+		}, function loginFailure(reason) {
 			loggedIn = false;
-			res.status(401).end();
+			res.status(401).json({ error: reason });
 		});
 	});
 
