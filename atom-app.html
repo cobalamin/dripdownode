@@ -13,10 +13,10 @@
 	<link rel="stylesheet" href="dist/app.css">
 </head>
 <body ng-app="dripdownode" ng-controller="MainController as ctrl">
-	<div id="spinner-overlay" ng-hide="ctrl.loading">
-		<div id="spinner-message">Loading some shiz</div>
+	<div id="spinner-overlay" ng-show="ctrl.loading">
+		<div id="spinner-message">{{ctrl.loadingMsg || 'Please wait...'}}</div>
 	</div>
-	<div id="login-overlay" ng-hide="ctrl.user.loggedIn">
+	<div id="login-overlay" ng-show="!ctrl.loggedIn && ctrl.loginStateFetched">
 		<div id="login-vcenter">
 			<div id="login-wrapper">
 				<div id="login-modal">
@@ -35,15 +35,17 @@
 		</div>
 	</div>
 
-	<div id="content" ng-show="ctrl.user.loggedIn">
-		<h3>Logged in as {{userData.firstname}} {{userData.lastname}}</h3>
-		<ul>
-			You have {{userData.memberships.length}} active subscriptions:
-			<li ng-repeat="sub in userData.memberships">
-				<img ng-src="{{sub.creative.avatar_thumb_url}}" width="20" height="20">
-				{{sub.creative.service_name}}
-			</li>
-		</ul>
+	<div id="content" ng-show="ctrl.loggedIn">
+		<div id="sidebar">
+			<h3>Logged in as {{ctrl.user.data.firstname}} {{ctrl.user.data.lastname}}</h3>
+			<ul>
+				You have {{ctrl.user.data.memberships.length}} active subscriptions:
+				<li ng-repeat="sub in ctrl.user.data.memberships">
+					<img ng-src="{{sub.creative.avatar_thumb_url}}" width="20" height="20">
+					{{sub.creative.service_name}}
+				</li>
+			</ul>
+		</div>
 	</div>
 </body>
 </html>

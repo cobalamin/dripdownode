@@ -7,8 +7,11 @@ var request = require('request')
 
 module.exports = {
 	login: login,
+	getLoginState: getLoginState,
+
 	getSubscriptions: getSubscriptions,
 	getReleases: getReleases,
+
 	downloadRelease: downloadRelease,
 	releaseDlPath: releaseDlPath
 };
@@ -17,9 +20,10 @@ var DLPATH = path.join(GLOBAL.proj_root, 'Downloads');
 if(!fs.existsSync(DLPATH)) { fs.mkdirSync(DLPATH); }
 
 var loginPromise = null;
+
 function login(email, password) {
-	if(loginPromise && loginPromise.state === 'fulfilled') {
-		return loginPromise;
+	if(!email || !password) {
+		return Q.reject("Email or password omitted");
 	}
 
 	loginPromise = Q.Promise(function(resolve, reject) {
@@ -44,6 +48,11 @@ function login(email, password) {
 	});
 
 	return loginPromise;
+}
+
+function getLoginState() {
+	if(loginPromise) { return loginPromise; }
+	else { return Q.reject('Not logged in'); }
 }
 
 function getSubscriptions() {

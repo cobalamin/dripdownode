@@ -3,15 +3,15 @@ angular.module('dripdownode')
 function($http) {
 	return {
 		login: login,
-		getSubscriptions: getSubscriptions
+		getLoginState: getLoginState
 	};
-
-	function getSubscriptions() {
-		return $http.get('/api/subscriptions');
-	}
 
 	function login(email, password) {
 		return $http.post('/api/login',
 			{ email: email, password: password });
+	}
+
+	function getLoginState() {
+		return $http.get('/api/login');
 	}
 }]);

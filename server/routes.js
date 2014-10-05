@@ -9,21 +9,30 @@ module.exports = function addRoutesToApp(app) {
 
 	var loggedIn = false;
 
+	app.get('/api/login', function(req, res) {
+		downloader.getLoginState()
+		.then(function isLoggedIn(loginState) {
+			res.json(loginState.data);
+		}, function isNotLoggedIn() {
+			res.status(401).end();
+		});
+	});
+
 	app.post('/api/login', function(req, res) {
-		var email = req.body.email
-			, password = req.body.password;
+		var email = req.body.email,
+			password = req.body.password;
 
 		downloader.login(email, password)
 		.then(function loginSuccess(response) {
 			loggedIn = true;
-			res.status(200).json(response.data);
+			res.json(response.data);
 		}, function loginFailure() {
 			loggedIn = false;
 			res.status(401).end();
 		});
 	});
 
-	// Use the RegExp constructor instead of literal form, because we'd have to
+	// Use `RegExp` instead of literal form, because we'd have to
 	// escape slashes like this: /^\/api\/.*/
 	app.use(RegExp("^/api/.*"), function(req, res, next) {
 		if(loggedIn) next();

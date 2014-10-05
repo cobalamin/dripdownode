@@ -3,19 +3,48 @@ angular.module('dripdownode')
 function subscriptionsController($rootScope, server) {
 	var ctrl = this;
 
-	// ================================== State ==================================
+	// =============================== State & Init ==============================
 
-	// TODO ask server about current login state on initialisation
 	ctrl.user = {
 		email: '',
 		password: '',
-		loggedIn: false,
-		loginMsg: 'Please log in'
+		data: {}
 	};
+
+	// Login state and message
+	ctrl.loggedIn = false;
+	ctrl.loginMsg = '';
+
+	// Loading state and message
 	ctrl.loading = false;
+	ctrl.loadingMessage = '';
+
+	// Have we fetched the login state from the server?
+	ctrl.loginStateFetched = false;
+
+	// Get current login state from the server
+	(function getLoginState() {
+		setLoadingState(true);
+		setLoadingMessage('Fetching login state...');
+
+		server.getLoginState()
+		.success(function(data) {
+			setLoginState(true);
+			ctrl.user.data = data;
+		}, function() {
+			setLoginState(false);
+		})
+		.finally(function() {
+			setLoadingState(false);
+			ctrl.loginStateFetched = true;
+		});
+	})();
 
 	// Listen for not-logged-in event and reset user state when it's fired
-	$rootScope.$on('not:logged:in', notLoggedIn);
+	$rootScope.$on('not:logged:in', function() {
+		setLoginState(false);
+		setLoginMessage("You don't seem to be logged in :(");
+	});
 
 	// =================================== API ===================================
 
@@ -24,31 +53,41 @@ function subscriptionsController($rootScope, server) {
 	// =========================== Function definitions ==========================
 
 	function login() {
-		ctrl.loading = true;
+		setLoadingState(true);
+		setLoadingMessage('Tryna log you in...');
 
-		server.login(ctrl.user.email, ctrl.user.password)
+		var email = ctrl.user.email, password = ctrl.user.password;
+		// Set password to empty, we don't want to store it on the user object
+		ctrl.user.password = '';
+
+		return server.login(email, password)
 		.success(function(userData) {
-			// Setting on the root scope to remove need to use `ctrl.user.data`
-			// for every single userData value in the HTML
-			$rootScope.userData = userData;
-			ctrl.user.loggedIn = true;
+			ctrl.user.data = userData;
+			setLoginState(true);
+			setLoginMessage('');
 		})
 		.error(function(data, status) {
-			ctrl.user.loggedIn = false;
-			if(status == 401) { ctrl.user.loginMsg = 'Wrong email or password'; }
-			else { ctrl.user.loginMsg = 'Error while logging in'; }
+			setLoginState(false);
+			if(status == 401) { setLoginMessage('Wrong email or password'); }
+			else { setLoginMessage('Error while logging in'); }
 		})
 		.finally(function() {
-			ctrl.loading = false;
+			setLoadingState(false);
 			getSubscriptions();
 		});
-
-		// Reset password in any case
-		ctrl.user.password = '';
 	}
 
-	function notLoggedIn() {
-		ctrl.user.loggedIn = false;
-		ctrl.user.loginMsg = 'You are not logged in';
+	function setLoginState(state) {
+		ctrl.loggedIn = !!state;
+	}
+	function setLoginMessage(message) {
+		ctrl.loginMsg = String(message);
+	}
+
+	function setLoadingState(state) {
+		ctrl.loading = !!state;
+	}
+	function setLoadingMessage(message) {
+		ctrl.loadingMsg = String(message);
 	}
 }]);

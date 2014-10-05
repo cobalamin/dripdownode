@@ -5,3 +5,13 @@
 	display: table-cell;
 	vertical-align: middle;
 }
+
+%clearfix {
+	&:before, &:after {
+		display: block;
+	}
+
+	&:after {
+		clear: both;
+	}
+}

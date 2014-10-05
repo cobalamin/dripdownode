@@ -1,0 +1,10 @@
+// The main content container
+#content {
+	@extend %clearfix;
+	border: 2px solid #f00;
+	padding: $whitespace;
+
+	#sidebar {
+		float: left;
+	}
+}
