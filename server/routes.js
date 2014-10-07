@@ -48,8 +48,8 @@ module.exports = function addRoutesToApp(app) {
 		})
 	});
 
-	app.get('/api/subscriptions/:id/releases', function(req, res) {
-		downloader.getReleases(req.params.id)
+	app.get('/api/subscriptions/:id/releases/:page', function(req, res) {
+		downloader.getReleases(req.params.id, req.params.page || 1)
 		.then(function(releases) {
 			res.json(releases);
 		}, function(err) {
