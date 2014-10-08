@@ -1,0 +1,13 @@
+<div id="sidebar">
+	<p class="sidebar-text">
+		Hi, {{state.userData.firstname}}! <!-- logout button -->
+	</p>
+	<div ng-repeat="sub in state.userData.memberships"
+		class="subscription"
+		ng-class="{active: $index === 0}">
+		<img ng-src="{{sub.creative.avatar_thumb_url}}"
+			class="subscription-thumb">
+		{{sub.creative.service_name}}
+	</div>
+</div>
+<div id="content"></div>

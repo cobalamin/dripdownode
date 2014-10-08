@@ -2,9 +2,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<base href="/">
 
 	<!-- Angular -->
-	<script src="components/angular/angular.min.js"></script>
+	<script src="components/angular/angular.js"></script>
+	<script src="components/angular-route/angular-route.js"></script>
 	<!-- Spinner -->
 	<script src="components/spinjs/spin.js"></script>
 
@@ -12,22 +14,22 @@
 	<script src="dist/app.js"></script>
 	<link rel="stylesheet" href="dist/app.css">
 </head>
-<body ng-app="dripdownode" ng-controller="MainController as mainCtrl">
-	<div id="spinner-overlay" ng-show="loading">
-		<div id="spinner-message">{{loadingMsg || 'Please wait...'}}</div>
+<body ng-app="dripdownode" ng-controller="MainController as state">
+	<div id="spinner-overlay" ng-show="state.loading">
+		<div id="spinner-message">{{state.loadingMsg || 'Please wait...'}}</div>
 	</div>
-	<div id="login-overlay" ng-show="!loggedIn && loginStateFetched">
+	<div id="login-overlay" ng-show="!state.loggedIn && state.loginStateFetched">
 		<div id="login-vcenter">
 			<div id="login-wrapper">
 				<div id="login-modal">
 					<h1>The Drip Downloader</h1>
-					<form ng-submit="mainCtrl.login()">
+					<form ng-submit="state.login()">
 						<div class="error"
-							ng-show="loginMsg">{{loginMsg}}</div>
+							ng-show="state.loginMsg">{{state.loginMsg}}</div>
 						<input type="text" placeholder="Your drip.fm email"
-							ng-model="user.email">
+							ng-model="state.user.email">
 						<input type="password" placeholder="Your drip.fm password"
-							ng-model="user.password">
+							ng-model="state.user.password">
 						<button>Log in!</button>
 					</form>
 				</div>
@@ -35,22 +37,6 @@
 		</div>
 	</div>
 
-	<div id="container" ng-show="loggedIn">
-		<div id="sidebar">
-			<p class="sidebar-text">
-				Hi, {{userData.firstname}}! <!-- logout button -->
-			</p>
-			<div ng-repeat="sub in userData.memberships"
-				class="subscription"
-				ng-class="{active: $index === 0}">
-				<img ng-src="{{sub.creative.avatar_thumb_url}}"
-					class="subscription-thumb">
-				{{sub.creative.service_name}}
-			</div>
-		</div>
-		<div id="content">
-			<h1 style="margin:0">Select a subscription pls :D</h1>
-		</div>
-	</div>
+	<div id="container" ng-view></div>
 </body>
 </html>

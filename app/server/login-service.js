@@ -1,5 +1,5 @@
 angular.module('dripdownode')
-.factory('ServerService', ['$http',
+.factory('LoginService', ['$http',
 function($http) {
 	return {
 		login: login,

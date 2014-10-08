@@ -10,6 +10,7 @@ var ROOT = GLOBAL.proj_root
 
 // Static content
 app.use('/components', express.static(ROOT + '/components'));
+app.use('/templates', express.static(ROOT + '/templates'));
 app.use('/dist', express.static(ROOT + '/dist'));
 app.use('/fonts', express.static(ROOT + '/fonts'));
 app.get('/', function(req, res) {

@@ -8,8 +8,6 @@ module.exports = {
 	getReleases: getReleases
 };
 
-// TODO caching for already retrieved pages
-
 function getReleases(user, cookie, subID, page) {
 	return Q.promise(function(resolve, reject) {
 		if(!user || !subID) {

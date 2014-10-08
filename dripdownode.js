@@ -25,6 +25,8 @@ var DISCLAIMER =
 "\\==============================================================================/\n";
 print(DISCLAIMER);
 
+print("\n===== THIS TOOL IS BROKEN, DON'T USE IT FOR NOW =====\n");
+
 var login = Q.promise(function(resolve, reject) {
 	read({ prompt: "What's your email?" },
 	function(err, email) {

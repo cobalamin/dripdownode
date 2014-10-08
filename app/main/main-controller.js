@@ -1,31 +1,31 @@
 angular.module('dripdownode')
-.controller('MainController', ['$rootScope', '$scope', 'ServerService',
-function subscriptionsController($rootScope, $scope, server) {
+.controller('MainController', ['$rootScope', '$scope', 'LoginService', '$location',
+function mainController($rootScope, $scope, LoginService, $location) {
 	var ctrl = this;
 
 	// =============================== State & Init ==============================
 
 	// Loading state and message
-	$scope.loading = false;
-	$scope.loadingMessage = '';
+	ctrl.loading = false;
+	ctrl.loadingMessage = '';
 
 	// User / Login state
-	$scope.user = {
+	ctrl.user = {
 		email: '',
 		password: ''
 	};
 	// Login state and message
-	$scope.loggedIn = false;
-	$scope.loginMsg = '';
+	ctrl.loggedIn = false;
+	ctrl.loginMsg = '';
 	// Have we fetched the login state from the server?
-	$scope.loginStateFetched = false;
+	ctrl.loginStateFetched = false;
 
 	// Get current login state from the server
 	(function getLoginState() {
 		setLoadingState(true);
 		setLoadingMessage('Fetching login state...');
 
-		server.getLoginState()
+		LoginService.getLoginState()
 		.success(setUserData)
 		.error(function(response) {
 			setLoginState(false);
@@ -33,7 +33,7 @@ function subscriptionsController($rootScope, $scope, server) {
 		})
 		.finally(function() {
 			setLoadingState(false);
-			$scope.loginStateFetched = true;
+			ctrl.loginStateFetched = true;
 		});
 	})();
 
@@ -53,12 +53,12 @@ function subscriptionsController($rootScope, $scope, server) {
 		setLoadingState(true);
 		setLoadingMessage('Tryna log you in...');
 
-		var email = $scope.user.email,
-			password = $scope.user.password;
+		var email = ctrl.user.email,
+			password = ctrl.user.password;
 		// Set password to empty, we don't want to store it on the user object
-		$scope.user.password = '';
+		ctrl.user.password = '';
 
-		return server.login(email, password)
+		return LoginService.login(email, password)
 		.success(setUserData)
 		.error(function(response, status) {
 			setLoginState(false);
@@ -72,22 +72,27 @@ function subscriptionsController($rootScope, $scope, server) {
 	function setUserData(data) {
 		setLoginState(true);
 		setLoginMessage('');
-		$scope.userData = data;
+		ctrl.userData = data;
 	}
 
 	function setLoginState(state) {
-		$scope.loggedIn = !!state;
-		if(!state) { setLoginMessage(''); }
+		ctrl.loggedIn = !!state;
+		if(state) {
+			$location.path('/select');
+		}
+		else {
+			setLoginMessage('');
+		}
 	}
 	function setLoginMessage(message) {
-		$scope.loginMsg = String(message);
+		ctrl.loginMsg = String(message);
 	}
 
 	function setLoadingState(state) {
-		$scope.loading = !!state;
+		ctrl.loading = !!state;
 		if(!state) { setLoadingMessage(''); }
 	}
 	function setLoadingMessage(message) {
-		$scope.loadingMsg = String(message);
+		ctrl.loadingMsg = String(message);
 	}
 }]);
