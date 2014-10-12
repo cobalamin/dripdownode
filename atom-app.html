@@ -7,6 +7,8 @@
 	<!-- Angular -->
 	<script src="components/angular/angular.js"></script>
 	<script src="components/angular-route/angular-route.js"></script>
+	<!-- Lo-Dash, thank you based JDD -->
+	<script src="components/lodash/dist/lodash.js"></script>
 	<!-- Spinner -->
 	<script src="components/spinjs/spin.js"></script>
 
@@ -14,22 +16,23 @@
 	<script src="dist/app.js"></script>
 	<link rel="stylesheet" href="dist/app.css">
 </head>
-<body ng-app="dripdownode" ng-controller="MainController as state">
-	<div id="spinner-overlay" ng-show="state.loading">
-		<div id="spinner-message">{{state.loadingMsg || 'Please wait...'}}</div>
+<body ng-app="dripdownode" ng-controller="MainController as ctrl">
+	<div id="spinner-overlay" ng-show="ctrl.loading_state.loading">
+		<div id="spinner-message">{{ctrl.loading_state.message || "Please wait..."}}</div>
 	</div>
-	<div id="login-overlay" ng-show="!state.loggedIn && state.loginStateFetched">
+	<div id="login-overlay"
+		ng-show="ctrl.login_state.fetched && !ctrl.login_state.logged_in">
 		<div id="login-vcenter">
 			<div id="login-wrapper">
 				<div id="login-modal">
 					<h1>The Drip Downloader</h1>
-					<form ng-submit="state.login()">
+					<form ng-submit="ctrl.login()">
 						<div class="error"
-							ng-show="state.loginMsg">{{state.loginMsg}}</div>
+							ng-show="ctrl.login_state.message">{{ctrl.login_state.message}}</div>
 						<input type="text" placeholder="Your drip.fm email"
-							ng-model="state.user.email">
+							ng-model="ctrl.user.email">
 						<input type="password" placeholder="Your drip.fm password"
-							ng-model="state.user.password">
+							ng-model="ctrl.user.password">
 						<button>Log in!</button>
 					</form>
 				</div>

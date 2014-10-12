@@ -1,8 +1,8 @@
 <div id="sidebar">
 	<p class="sidebar-text">
-		Hi, {{state.userData.firstname}}! <!-- logout button -->
+		Hi, {{ctrl.user.data.firstname}}! <!-- logout button -->
 	</p>
-	<div ng-repeat="sub in state.userData.memberships"
+	<div ng-repeat="sub in ctrl.user.data.memberships"
 		class="subscription"
 		ng-class="{active: $index === 0}">
 		<img ng-src="{{sub.creative.avatar_thumb_url}}"
@@ -10,4 +10,6 @@
 		{{sub.creative.service_name}}
 	</div>
 </div>
-<div id="content"></div>
+<div id="content">
+	
+</div>

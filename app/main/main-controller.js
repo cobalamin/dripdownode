@@ -1,98 +1,70 @@
 angular.module('dripdownode')
-.controller('MainController', ['$rootScope', '$scope', 'LoginService', '$location',
-function mainController($rootScope, $scope, LoginService, $location) {
-	var ctrl = this;
-
-	// =============================== State & Init ==============================
+.controller('MainController', ['LoginService', '$location',
+function mainController(LoginSvc, $location) {
+	var _this_ = this;
 
 	// Loading state and message
-	ctrl.loading = false;
-	ctrl.loadingMessage = '';
+	this.loading_state = {
+		loading: false,
+		message: ''
+	};
 
 	// User / Login state
-	ctrl.user = {
+	this.user = {
+		data: {},
+		cookie: '',
+
 		email: '',
 		password: ''
 	};
-	// Login state and message
-	ctrl.loggedIn = false;
-	ctrl.loginMsg = '';
-	// Have we fetched the login state from the server?
-	ctrl.loginStateFetched = false;
 
-	// Get current login state from the server
-	(function getLoginState() {
-		setLoadingState(true);
-		setLoadingMessage('Fetching login state...');
+// ==================================== API ====================================
 
-		LoginService.getLoginState()
-		.success(setUserData)
-		.error(function(response) {
-			setLoginState(false);
-			setLoginMessage("Please log in.");
-		})
-		.finally(function() {
-			setLoadingState(false);
-			ctrl.loginStateFetched = true;
-		});
-	})();
+	this.login = login;
 
-	// Listen for not-logged-in event and reset user state when it's fired
-	$rootScope.$on('not:logged:in', function() {
-		setLoginState(false);
-		setLoginMessage("You don't seem to be logged in :(");
-	});
+// ==================================== Init ===================================
 
-	// =================================== API ===================================
+	fetchLoginState();
 
-	ctrl.login = login;
-
-	// =========================== Function definitions ==========================
+// ============================ Function definitions ===========================
 
 	function login() {
-		setLoadingState(true);
-		setLoadingMessage('Tryna log you in...');
+		setLoadingState(true, "Tryna log you in...");
+		var promise = LoginSvc.login(_this_.user.email, _this_.user.password);
 
-		var email = ctrl.user.email,
-			password = ctrl.user.password;
-		// Set password to empty, we don't want to store it on the user object
-		ctrl.user.password = '';
+		// Reset password to empty on user model
+		_this_.user.password = '';
+	}
 
-		return LoginService.login(email, password)
-		.success(setUserData)
-		.error(function(response, status) {
-			setLoginState(false);
-			setLoginMessage(response.error || 'Error while logging in');
+	function fetchLoginState() {
+		setLoadingState(true, "Fetching the login state...");
+		var promise = LoginSvc.fetchLoginState();
+		handleLogin(promise);
+	}
+
+	function handleLogin(loginPromise) {
+		loginPromise
+		.success(function(data) {
+			if(data) _this_.user.data = data;
+
+			// Switch to view to select releases
+			$location.path('/select');
+		})
+		.error(function(err) {
+			setLoginState(false, err || "Please log in");
 		})
 		.finally(function() {
 			setLoadingState(false);
 		});
 	}
 
-	function setUserData(data) {
-		setLoginState(true);
-		setLoginMessage('');
-		ctrl.userData = data;
+	function setLoadingState(loading, message) {
+		_this_.loading_state.loading = !!loading;
+		_this_.loading_state.message = message ? String(message) : "";
 	}
 
-	function setLoginState(state) {
-		ctrl.loggedIn = !!state;
-		if(state) {
-			$location.path('/select');
-		}
-		else {
-			setLoginMessage('');
-		}
-	}
-	function setLoginMessage(message) {
-		ctrl.loginMsg = String(message);
-	}
-
-	function setLoadingState(state) {
-		ctrl.loading = !!state;
-		if(!state) { setLoadingMessage(''); }
-	}
-	function setLoadingMessage(message) {
-		ctrl.loadingMsg = String(message);
+	function setLoginState(logged_in, message) {
+		_this_.login_state.logged_in = !!logged_in;
+		_this_.login_sate.message = message ? String(message) : "";
 	}
 }]);

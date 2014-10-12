@@ -1,7 +1,9 @@
 var express = require('express')
 	, app = express()
 	, http = require('http').Server(app)
-	, Q = require('q');
+	, Q = require('q')
+	, Proxy = require('http-proxy')
+	, https = require('https');
 
 var ROOT = GLOBAL.proj_root
 	, SENDFILE_OPTS = { root: ROOT }
@@ -17,8 +19,22 @@ app.get('/', function(req, res) {
 	res.sendFile('atom-app.html', SENDFILE_OPTS);
 });
 
-// App routes
-require('./routes')(app);
+// Proxy all /api requests to drip.fm
+var proxy = Proxy.createProxyServer();
+app.use('/api', function(req, res) {
+	proxy.web(req, res, {
+		target: 'https://drip.fm/api',
+		agent: https.globalAgent,
+		headers: {
+			host: 'drip.fm' // ha, you got tricked son
+		}
+	});
+});
+
+// Redirect to main HTML for all non-matching requests
+app.use(function (req, res, next) {
+	res.redirect('/');
+});
 
 module.exports = {
 	start: function startServer() {
