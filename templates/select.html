@@ -1,6 +1,7 @@
 <div id="sidebar">
 	<p class="sidebar-text">
-		Hi, {{ctrl.user.data.firstname}}! <!-- logout button -->
+		Hi, {{ctrl.user.data.firstname}}!
+		<button ng-click="ctrl.logout()">Log out</button>
 	</p>
 	<div ng-repeat="sub in ctrl.user.data.memberships"
 		class="subscription"
@@ -11,5 +12,10 @@
 	</div>
 </div>
 <div id="content">
-	
+	<div class="release" ng-repeat="release in ctrl.releases">
+		<img class="cover"
+			ng-src="{{release.cover.cover.thumb.url}}"
+			alt="{{release.title}}"
+			title="{{release.title}}">
+	</div>
 </div>
