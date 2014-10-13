@@ -10,17 +10,8 @@ var ROOT = GLOBAL.proj_root
 	, PORT = 55221
 	, START_TIMEOUT = 5;
 
-// Static content
-app.use('/components', express.static(ROOT + '/components'));
-app.use('/templates', express.static(ROOT + '/templates'));
-app.use('/dist', express.static(ROOT + '/dist'));
-app.use('/fonts', express.static(ROOT + '/fonts'));
-app.get('/', function(req, res) {
-	res.sendFile('atom-app.html', SENDFILE_OPTS);
-});
-
 // Proxy all /api requests to drip.fm
-var proxy = Proxy.createProxyServer();
+var proxy = Proxy.createServer();
 app.use('/api', function(req, res) {
 	proxy.web(req, res, {
 		target: 'https://drip.fm/api',
@@ -29,6 +20,22 @@ app.use('/api', function(req, res) {
 			host: 'drip.fm' // ha, you got tricked son
 		}
 	});
+});
+// Listen to proxy errors.
+// An ECONNRESET can happen frequently when the connection is closed by the
+// user, e.g. reloading the page when it's still loading. We handle them with
+// just a 500 code response, so that the server doesn't crash when they occur.
+proxy.on('error', function(err, req, res) {
+	res.status(500).end();
+});
+
+// Static content
+app.use('/components', express.static(ROOT + '/components'));
+app.use('/templates', express.static(ROOT + '/templates'));
+app.use('/dist', express.static(ROOT + '/dist'));
+app.use('/fonts', express.static(ROOT + '/fonts'));
+app.get('/', function(req, res) {
+	res.sendFile('atom-app.html', SENDFILE_OPTS);
 });
 
 // Redirect to main HTML for all non-matching requests
