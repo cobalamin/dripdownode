@@ -28,6 +28,7 @@ function($http, $q) {
 			_.each(subscriptions, function(subscription, idx) {
 				var release_pages = subscription.release_pages = [];
 
+				// TODO this is silly because it resolves indeterministically
 				fetchReleasePage(subscription, 1)
 				.then(function(releases) {
 					release_pages[0] = releases;

@@ -1,6 +1,11 @@
 angular.module('dripdownode')
-.controller('MainController', ['LoginService', 'SubscriptionService', '$location',
-function mainController(LoginSvc, SubscriptionSvc, $location) {
+.controller('MainController', [
+	'LoginService',
+	'SubscriptionService',
+	'StateService',
+	'$location',
+	'$rootScope',
+function mainController(LoginSvc, SubscriptionSvc, StateSvc, $location, $rootScope) {
 	var _this_ = this;
 
 	// Loading state and message
@@ -18,7 +23,6 @@ function mainController(LoginSvc, SubscriptionSvc, $location) {
 	// User / Login state
 	this.user = {
 		data: {},
-		cookie: '',
 
 		email: '',
 		password: ''
@@ -31,78 +35,62 @@ function mainController(LoginSvc, SubscriptionSvc, $location) {
 
 // ==================================== Init ===================================
 
+	setUpStateListeners();
 	fetchLoginState();
 
 // ============================ Function definitions ===========================
 
-	function logout() {
-		console.log('loggin out m8');
-		LoginSvc.logout()
-		.then(function() {
-			$location.path('/');
-			setLoginState(false, "You have been logged out.");
-		}, function() {
-			// TODO throw error?
+	function fetchLoginState() {
+		var fetchPromise = LoginSvc.fetchLoginState();
+		handleLogin(fetchPromise);
+
+		fetchPromise.finally(function() {
+			_this_.login_state.fetched = true;
 		});
 	}
 
 	function login() {
-		setLoadingState(true, "Tryna log you in");
+		var loginPromise = LoginSvc.login(_this_.user.email, _this_.user.password);
+		handleLogin(loginPromise);
 
-		var promise = LoginSvc.login(_this_.user.email, _this_.user.password);
-		handleLogin(promise);
-		promise.error(function(err) {
-			setLoginState(false, err || "Could not log you in :(");
-		});
-
-		// Reset password to empty on user model
-		_this_.user.password = '';
+		_this_.user.password = ''; // Reset password to empty
 	}
 
-	function fetchLoginState() {
-		setLoadingState(true, "Fetching the login state");
-
-		var promise = LoginSvc.fetchLoginState();
-		handleLogin(promise);
-		promise
-		.error(function() {
-			setLoginState(false, "Please log in :)");
-		})
-		.finally(function() { _this_.login_state.fetched = true; });
+	function logout() {
+		LoginSvc.logout()
+		.then(function() {
+			$location.path('/');
+		});
 	}
 
 	function handleLogin(loginPromise) {
 		loginPromise
 		.success(function(data) {
-			if(data) _this_.user.data = data;
+			StateSvc.setLoginState(true);
 
-			setLoadingState(true, "Fetching releases");
+			if(data) _this_.user.data = data;
+			StateSvc.setLoadingState(true, "Fetching releases");
 			SubscriptionSvc.init(data)
 			.then(function(releases) {
 				_this_.releases = releases; // TODO not here!
 			});
 
-			setLoginState(true);
-
-			// Switch to view to select releases
-			$location.path('/select');
+			$location.path('/select'); // Switch to view to select releases
 		})
 		.finally(function() {
-			setLoadingState(false);
+			StateSvc.setLoadingState(false);
 		});
 	}
 
-	function setLoadingState(loading, message) {
-		_this_.loading_state.loading = !!loading;
-		_this_.loading_state.message = message ? String(message) + '...' : "";
-	}
+	function setUpStateListeners() {
+		$rootScope.$on('login_state', function(e, stateObj) {
+			_this_.login_state.logged_in = stateObj.state;
+			_this_.login_state.message = stateObj.message;
+		});
 
-	function setLoginState(logged_in, message) {
-		if(typeof message == 'object' && message.errors) {
-			message = message.errors;
-		}
-
-		_this_.login_state.logged_in = !!logged_in;
-		_this_.login_state.message = message ? String(message) : "";
+		$rootScope.$on('loading_state', function(e, stateObj) {
+			_this_.loading_state.loading = stateObj.state;
+			_this_.loading_state.message = stateObj.message;
+		});
 	}
 }]);
