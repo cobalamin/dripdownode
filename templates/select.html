@@ -12,10 +12,28 @@
 	</div>
 </div>
 <div id="content">
-	<div class="release" ng-repeat="release in ctrl.releases">
-		<img class="cover"
-			ng-src="{{release.cover.cover.thumb.url}}"
-			alt="{{release.title}}"
-			title="{{release.title}}">
+	<div class="release-wrapper" ng-repeat="release in ctrl.releases">
+		<div class="release" ng-class="{ selected: release.selected }">
+			<div class="cover"
+				title="{{release.artist}} &ndash;{{release.title}}"
+				ng-style="release.cover.cover.thumb.url | backgroundImage">
+
+				<div class="select-overlay"
+					ng-click="release.selected = !release.selected">
+					<div class="overlay-text">
+						<div class="selector">
+							{{release.selected | selectedIndicator}}
+						</div>
+					</div>
+				</div>
+
+				<div class="selected-overlay"></div>
+			</div>
+
+			<div class="release-text">
+				<h5 class="release-artist">{{release.artist}}</h5>
+				<h4 class="release-title">{{release.title}}</h4>
+			</div>
+		</div>
 	</div>
 </div>
