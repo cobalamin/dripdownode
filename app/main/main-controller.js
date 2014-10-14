@@ -41,17 +41,29 @@ function mainController(LoginSvc, SubscriptionSvc, StateSvc, $location, $rootSco
 // ============================ Function definitions ===========================
 
 	function fetchLoginState() {
+		StateSvc.setLoadingState(true, "Fetching the login state");
+
 		var fetchPromise = LoginSvc.fetchLoginState();
 		handleLogin(fetchPromise);
 
-		fetchPromise.finally(function() {
+		fetchPromise
+		.error(function() {
+			StateSvc.setLoginState(false, "Please log in :)");
+		})
+		.finally(function() {
 			_this_.login_state.fetched = true;
 		});
 	}
 
 	function login() {
+		StateSvc.setLoadingState(true, "Tryna log you in");
+
 		var loginPromise = LoginSvc.login(_this_.user.email, _this_.user.password);
 		handleLogin(loginPromise);
+
+		loginPromise.error(function(err) {
+			StateSvc.setLoginState(false, err || "Could not log you in :(");
+		});
 
 		_this_.user.password = ''; // Reset password to empty
 	}

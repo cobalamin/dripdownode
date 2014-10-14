@@ -32,10 +32,9 @@ function($http, $q) {
 				fetchReleasePage(subscription, 1)
 				.then(function(releases) {
 					release_pages[0] = releases;
-					resolve(release_pages[0]); // Only has an effect once on first call
+					if(idx === 0) resolve(release_pages[0]);
 				}, function(err) {
 					release_pages[0] = { error: err };
-					reject(release_pages[0]); // Only has an effect once on first call
 				});
 			});
 			_this_.subscriptions = subscriptions;
