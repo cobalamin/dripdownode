@@ -3,19 +3,20 @@
 		Hi, {{ctrl.user.data.firstname}}!
 		<button ng-click="ctrl.logout()">Log out</button>
 	</p>
-	<div ng-repeat="sub in ctrl.user.data.memberships"
+	<div ng-repeat="sub in releases_ctrl.subscriptions"
 		class="subscription"
-		ng-class="{active: $index === 0}">
+		ng-class="{ active: sub.active }"
+		ng-click="releases_ctrl.setActiveSubscription($index)">
 		<img ng-src="{{sub.creative.avatar_thumb_url}}"
 			class="subscription-thumb">
 		{{sub.creative.service_name}}
 	</div>
 </div>
 <div id="content">
-	<div class="release-wrapper" ng-repeat="release in ctrl.releases">
+	<div class="release-wrapper" ng-repeat="release in releases_ctrl.visibleReleases">
 		<div class="release" ng-class="{ selected: release.selected }">
 			<div class="cover"
-				title="{{release.artist}} &ndash;{{release.title}}"
+				title="{{release.artist}} &ndash; {{release.title}}"
 				ng-style="release.cover.cover.thumb.url | backgroundImage">
 
 				<div class="select-overlay"

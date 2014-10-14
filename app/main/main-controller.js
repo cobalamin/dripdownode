@@ -81,11 +81,7 @@ function mainController(LoginSvc, SubscriptionSvc, StateSvc, $location, $rootSco
 			StateSvc.setLoginState(true);
 
 			if(data) _this_.user.data = data;
-			StateSvc.setLoadingState(true, "Fetching releases");
-			SubscriptionSvc.init(data)
-			.then(function(releases) {
-				_this_.releases = releases; // TODO not here!
-			});
+			SubscriptionSvc.init(data);
 
 			$location.path('/select'); // Switch to view to select releases
 		})

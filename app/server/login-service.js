@@ -1,6 +1,6 @@
 angular.module('dripdownode')
-.factory('LoginService', ['$http', '$window', 'StateService', 'SubscriptionService',
-function($http, $window, StateSvc, SubscriptionSvc) {
+.factory('LoginService', ['$http', '$window', 'StateService',
+function($http, $window, StateSvc) {
 	return {
 		login: login,
 		logout: logout,
@@ -10,7 +10,10 @@ function($http, $window, StateSvc, SubscriptionSvc) {
 // =============================== Server access ===============================
 
 	function _login(payload) {
-		return $http.post('/api/users/login', payload);
+		return $http.post('/api/users/login', payload)
+		.error(function() {
+			StateSvc.setLoginState(false, "It seems you've been logged out");
+		});
 	}
 
 	function _logout() {
