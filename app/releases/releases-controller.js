@@ -1,6 +1,6 @@
 angular.module('dripdownode')
-.controller('ReleasesController', ['LoginService', 'SubscriptionService', 'StateService',
-function(LoginSvc, SubscriptionSvc, StateSvc) {
+.controller('ReleasesController', ['LoginService', 'ReleasesService', 'StateService',
+function(LoginSvc, ReleasesSvc, StateSvc) {
 	var _this_ = this;
 
 	this.subscriptions = null;
@@ -9,6 +9,7 @@ function(LoginSvc, SubscriptionSvc, StateSvc) {
 // ==================================== API ====================================
 
 	this.setActiveSubscription = setActiveSubscription;
+	this.toggleSelected = toggleSelected;
 
 // ==================================== Init ===================================
 
@@ -22,16 +23,23 @@ function(LoginSvc, SubscriptionSvc, StateSvc) {
 	function _setActiveReleasePage(sub, page) {
 		StateSvc.setLoadingState(true, 'Loading releases');
 
-		SubscriptionSvc.getReleases(sub, page)
-		.then(function(response) {
-			_this_.visibleReleases = response.data;
+		ReleasesSvc.getReleases(sub, page)
+		.success(function(data) {
+			_this_.visibleReleases = data;
 		})
 		.finally(function() {
 			StateSvc.setLoadingState(false);
 		});
 	}
 
+	function toggleSelected(release) {
+		ReleasesSvc.toggleSelected(release);
+	}
+
 	function setActiveSubscription(idx) {
+		if(!_this_.subscriptions[idx]) return;
+
+		// Set active state to true, false for all other subscriptions
 		_.each(_this_.subscriptions, function(sub, i) {
 			sub.active = (i === idx);
 		});

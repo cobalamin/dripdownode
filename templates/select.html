@@ -14,16 +14,16 @@
 </div>
 <div id="content">
 	<div class="release-wrapper" ng-repeat="release in releases_ctrl.visibleReleases">
-		<div class="release" ng-class="{ selected: release.selected }">
+		<div class="release" ng-class="{ selected: (release | isSelected) }">
 			<div class="cover"
 				title="{{release.artist}} &ndash; {{release.title}}"
 				ng-style="release.cover.cover.thumb.url | backgroundImage">
 
 				<div class="select-overlay"
-					ng-click="release.selected = !release.selected">
+					ng-click="releases_ctrl.toggleSelected(release)">
 					<div class="overlay-text">
 						<div class="selector">
-							{{release.selected | selectedIndicator}}
+							{{release | isSelected | selectedIndicator}}
 						</div>
 					</div>
 				</div>

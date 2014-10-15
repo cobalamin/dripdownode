@@ -1,11 +1,10 @@
 angular.module('dripdownode')
 .controller('MainController', [
 	'LoginService',
-	'SubscriptionService',
 	'StateService',
 	'$location',
 	'$rootScope',
-function mainController(LoginSvc, SubscriptionSvc, StateSvc, $location, $rootScope) {
+function mainController(LoginSvc, StateSvc, $location, $rootScope) {
 	var _this_ = this;
 
 	// Loading state and message
@@ -81,7 +80,6 @@ function mainController(LoginSvc, SubscriptionSvc, StateSvc, $location, $rootSco
 			StateSvc.setLoginState(true);
 
 			if(data) _this_.user.data = data;
-			SubscriptionSvc.init(data);
 
 			$location.path('/select'); // Switch to view to select releases
 		})
