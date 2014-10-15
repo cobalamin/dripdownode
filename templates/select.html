@@ -3,23 +3,41 @@
 		Hi, {{ctrl.user.data.firstname}}!
 		<button ng-click="ctrl.logout()">Log out</button>
 	</p>
+
+	<form id="release-filter"
+		ng-submit="releases_ctrl.filterByQuery()">
+		<input placeholder="Search for a release..."
+			type="text" ng-model="releases_ctrl.query">
+	</form>
+
+	<div class="subscription"
+		ng-click="releases_ctrl.filterBySubscription(null)">
+		<div class="subscription-thumb"
+			ng-style="ctrl.user.data.avatar_url | backgroundImage"></div>
+		All Subscriptions</div>
 	<div ng-repeat="sub in releases_ctrl.subscriptions"
 		class="subscription"
 		ng-class="{ active: sub.active }"
-		ng-click="releases_ctrl.setActiveSubscription($index)">
-		<img ng-src="{{sub.creative.avatar_thumb_url}}"
-			class="subscription-thumb">
+		ng-click="releases_ctrl.filterBySubscription(sub)">
+		<div ng-style="sub.creative.avatar_thumb_url | backgroundImage"
+			class="subscription-thumb"></div>
 		{{sub.creative.service_name}}
 	</div>
+
 	<hr>
+
 	<p class="sidebar-text">
 		{{releases_ctrl.selected_count}} selected for download
 	</p>
+
+	<button id="download-button">
+		GET 'EM ALL
+	</button>
 </div>
 <div id="content">
 	<div class="release-wrapper"
 		ng-repeat="release in releases_ctrl.visible_releases">
-		<div class="release" ng-class="{ selected: (release | isSelected) }">
+		<div class="release" ng-class="{ selected: (release | isSelectedRelease) }">
 			<div class="cover"
 				title="{{release.artist}} &ndash; {{release.title}}"
 				ng-style="release.cover.cover.thumb.url | backgroundImage">
@@ -28,7 +46,7 @@
 					ng-click="releases_ctrl.toggleSelected(release)">
 					<div class="overlay-text">
 						<div class="selector">
-							{{release | isSelected | selectedIndicator}}
+							{{release | isSelectedRelease | selectedIndicator}}
 						</div>
 					</div>
 				</div>

@@ -6,11 +6,13 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	this.subscriptions = null;
 	this.visible_releases = null;
 	this.selected_count = 0;
+	this.query = '';
 
 // ==================================== API ====================================
 
-	this.setActiveSubscription = setActiveSubscription;
+	this.filterBySubscription = filterBySubscription;
 	this.toggleSelected = toggleSelected;
+	this.filterByQuery = filterByQuery;
 
 // ==================================== Init ===================================
 
@@ -18,9 +20,11 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	LoginSvc.fetchLoginState()
 	.success(function(user_data) {
 		_this_.subscriptions = user_data.memberships;
-		setActiveSubscription(0);
+		filterBySubscription(_this_.subscriptions[0]);
 	});
-	// error is handled by the LoginSvc itself
+	// error is handled by the LoginService
+
+// ============================ Function definitions ===========================
 
 	function _setActiveReleasePage(sub, page) {
 		StateSvc.setLoadingState(true, 'Loading releases');
@@ -39,14 +43,19 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 		_this_.selected_count = Number(ReleasesSvc.getSelectedCount());
 	}
 
-	function setActiveSubscription(idx) {
-		if(!_this_.subscriptions[idx]) return;
+	function filterBySubscription(selected_sub) {
+		// TODO null check to set to 'all subscriptions'!
+		if(selected_sub == null) return;
 
 		// Set active state to true, false for all other subscriptions
 		_.each(_this_.subscriptions, function(sub, i) {
-			sub.active = (i === idx);
+			sub.active = (sub === selected_sub);
 		});
-		_setActiveReleasePage(_this_.subscriptions[idx], 1);
+		_setActiveReleasePage(selected_sub, 1);
+	}
+
+	function filterByQuery() {
+		var query = _this_.query;
 	}
 }]);
 
