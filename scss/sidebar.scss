@@ -1,6 +1,19 @@
 $subs-height: 30px;
 $sidebar-whitespace: 10px;
 
+#sidebar > * {
+	padding-left: $whitespace;
+	padding-right: $whitespace;
+}
+#sidebar hr {
+	margin-left: $whitespace / 2;
+	margin-right: $whitespace / 2;
+
+	@include colors-accent;
+	height: 2px;
+	border: 0 none;
+}
+
 .subscription {
 	box-sizing: initial;
 	height: $subs-height;
@@ -29,9 +42,6 @@ $sidebar-whitespace: 10px;
 		margin-right: $sidebar-whitespace;
 	}
 
-	padding: $sidebar-whitespace $whitespace;
-}
-
-.sidebar-text {
-	padding: 0 $whitespace;
+	padding-top: $sidebar-whitespace;
+	padding-bottom: $sidebar-whitespace;
 }

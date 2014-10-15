@@ -10,10 +10,7 @@ function($http, $window, StateSvc) {
 // =============================== Server access ===============================
 
 	function _login(payload) {
-		return $http.post('/api/users/login', payload)
-		.error(function() {
-			StateSvc.setLoginState(false, "It seems you've been logged out");
-		});
+		return $http.post('/api/users/login', payload);
 	}
 
 	function _logout() {

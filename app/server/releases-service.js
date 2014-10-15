@@ -2,7 +2,6 @@ angular.module('dripdownode')
 .factory('ReleasesService', ['$http', '$q',
 function($http, $q) {
 	var _this_ = this;
-
 	var selectedReleases = new Map();
 
 // ==================================== API ====================================
@@ -10,7 +9,8 @@ function($http, $q) {
 	return {
 		getReleases: getReleases,
 		toggleSelected: toggleSelected,
-		isSelected: isSelected
+		isSelected: isSelected,
+		getSelectedCount: getSelectedCount
 	};
 
 // ============================ Function definitions ===========================
@@ -22,6 +22,10 @@ function($http, $q) {
 		else {
 			selectedReleases.set(release.id, release);
 		}
+	}
+
+	function getSelectedCount() {
+		return selectedReleases.size;
 	}
 
 	function isSelected(release) {

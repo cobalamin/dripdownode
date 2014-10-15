@@ -11,9 +11,14 @@
 			class="subscription-thumb">
 		{{sub.creative.service_name}}
 	</div>
+	<hr>
+	<p class="sidebar-text">
+		{{releases_ctrl.selected_count}} selected for download
+	</p>
 </div>
 <div id="content">
-	<div class="release-wrapper" ng-repeat="release in releases_ctrl.visibleReleases">
+	<div class="release-wrapper"
+		ng-repeat="release in releases_ctrl.visible_releases">
 		<div class="release" ng-class="{ selected: (release | isSelected) }">
 			<div class="cover"
 				title="{{release.artist}} &ndash; {{release.title}}"

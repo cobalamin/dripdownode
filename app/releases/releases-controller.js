@@ -4,7 +4,8 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	var _this_ = this;
 
 	this.subscriptions = null;
-	this.visibleReleases = null;
+	this.visible_releases = null;
+	this.selected_count = 0;
 
 // ==================================== API ====================================
 
@@ -13,6 +14,7 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 
 // ==================================== Init ===================================
 
+	StateSvc.setLoadingState(true, 'Fetching user data');
 	LoginSvc.fetchLoginState()
 	.success(function(user_data) {
 		_this_.subscriptions = user_data.memberships;
@@ -24,8 +26,8 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 		StateSvc.setLoadingState(true, 'Loading releases');
 
 		ReleasesSvc.getReleases(sub, page)
-		.success(function(data) {
-			_this_.visibleReleases = data;
+		.then(function(response) {
+			_this_.visible_releases = response.data;
 		})
 		.finally(function() {
 			StateSvc.setLoadingState(false);
@@ -34,6 +36,7 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 
 	function toggleSelected(release) {
 		ReleasesSvc.toggleSelected(release);
+		_this_.selected_count = Number(ReleasesSvc.getSelectedCount());
 	}
 
 	function setActiveSubscription(idx) {
