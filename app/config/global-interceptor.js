@@ -1,16 +1,16 @@
 angular.module('dripdownode')
-.factory('authHttpResponseInterceptor', ['$q', '$rootScope',
+.factory('authHttpResponseInterceptor', ['$q', 'StateService',
 function($q, $rootScope){
 	return {
 		response: function(response){
 			if (response.status === 401) {
-				$rootScope.$broadcast('not:logged:in');
+				StateService.setLoginState(false);
 			}
 			return response || $q.when(response);
 		},
 		responseError: function(rejection) {
 			if (rejection.status === 401) {
-				$rootScope.$broadcast('not:logged:in');
+				StateService.setLoginState(false);
 			}
 			return $q.reject(rejection);
 		}
