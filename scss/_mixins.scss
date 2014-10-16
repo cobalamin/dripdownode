@@ -1,0 +1,13 @@
+@mixin rounded-shadow-button($radius) {
+	$shadow-offset: 0.6 * $radius;
+	box-shadow: $shadow-offset $shadow-offset 0 0 rgba(0, 0, 0, 0.3);
+
+	border-radius: $radius;
+
+	&:active {
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
+		margin-top: $shadow-offset;
+		margin-bottom: -$shadow-offset;
+		margin-left: $shadow-offset;
+	}
+}

@@ -1,6 +1,6 @@
 angular.module('dripdownode')
-.factory('ReleasesService', ['$http', '$q',
-function($http, $q) {
+.factory('ReleasesService', ['$http', '$q', 'LoginService',
+function($http, $q, LoginSvc) {
 	var _this_ = this;
 	var selectedReleases = new Map();
 
@@ -32,10 +32,21 @@ function($http, $q) {
 		return selectedReleases.has(release.id);
 	}
 
-	function getReleases(sub, page) {
-		page = Number(page || 1);
+	function getReleases(sub, page, query) {
+		page = Math.max(1, Number(page));
 
-		return $http.get('/api/creatives/' + sub.creative_id +
-			'/releases' + '?page=' + page);
+		return $q(function(resolve, reject) {
+			LoginSvc.getUserData()
+			.then(function(response) {
+				var url = '/api/users/' + response.data.id + '/releases';
+				if(sub != null) { url += '/creatives/' + sub.creative_id; }
+				url += '?page=' + page;
+				if(query) { url += '&q=' + query; }
+
+				$http.get(url)
+				.success(resolve)
+				.error(reject);
+			}, reject);
+		});
 	}
 }]);

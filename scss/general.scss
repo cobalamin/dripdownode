@@ -3,11 +3,10 @@ button {
 	cursor: pointer;
 	background: #00f;
 	border: 0px none;
-	@include colors-dark;
+	@include colors-accent2;
 
-	&:active {
-		@include colors-primary;
-	}
+	&:active, &:focus { outline: 0 none; }
+	transition: all .05s linear;
 }
 
 input, button {

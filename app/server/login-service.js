@@ -4,7 +4,8 @@ function($http, $window, StateSvc) {
 	return {
 		login: login,
 		logout: logout,
-		fetchLoginState: fetchLoginState
+		fetchLoginState: fetchLoginState,
+		getUserData: fetchLoginState
 	};
 
 // =============================== Server access ===============================

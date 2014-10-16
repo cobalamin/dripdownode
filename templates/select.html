@@ -1,24 +1,25 @@
 <div id="sidebar">
 	<p class="sidebar-text">
 		Hi, {{ctrl.user.data.firstname}}!
-		<button ng-click="ctrl.logout()">Log out</button>
+		<button id="logout-button" ng-click="ctrl.logout()">Log out</button>
 	</p>
 
 	<form id="release-filter"
-		ng-submit="releases_ctrl.filterByQuery()">
-		<input placeholder="Search for a release..."
+		ng-submit="releases_ctrl.setFilterQuery()">
+		<input placeholder="Search for releases..."
 			type="text" ng-model="releases_ctrl.query">
 	</form>
 
 	<div class="subscription"
-		ng-click="releases_ctrl.filterBySubscription(null)">
+		ng-click="releases_ctrl.setActiveSub(null)"
+		ng-class="{ active: releases_ctrl.subscription === null }">
 		<div class="subscription-thumb"
 			ng-style="ctrl.user.data.avatar_url | backgroundImage"></div>
 		All Subscriptions</div>
 	<div ng-repeat="sub in releases_ctrl.subscriptions"
+		ng-click="releases_ctrl.setActiveSub(sub)"
 		class="subscription"
-		ng-class="{ active: sub.active }"
-		ng-click="releases_ctrl.filterBySubscription(sub)">
+		ng-class="{ active: releases_ctrl.subscription === sub }">
 		<div ng-style="sub.creative.avatar_thumb_url | backgroundImage"
 			class="subscription-thumb"></div>
 		{{sub.creative.service_name}}
@@ -35,28 +36,46 @@
 	</button>
 </div>
 <div id="content">
-	<div class="release-wrapper"
-		ng-repeat="release in releases_ctrl.visible_releases">
-		<div class="release" ng-class="{ selected: (release | isSelectedRelease) }">
-			<div class="cover"
-				title="{{release.artist}} &ndash; {{release.title}}"
-				ng-style="release.cover.cover.thumb.url | backgroundImage">
+	<div id="page-navigation">
+		<button id="prev-page" ng-click="releases_ctrl.seek(false)"
+			ng-show="releases_ctrl.page && releases_ctrl.page > 1">
+			&laquo; Previous</button>
+		<button id="next-page" ng-click="releases_ctrl.seek(true)"
+			ng-show="releases_ctrl.releases.length == 20">
+			Next &raquo;</button>
+		<div id="current-page"><div>{{releases_ctrl.page}}</div></div>
+	</div>
 
-				<div class="select-overlay"
-					ng-click="releases_ctrl.toggleSelected(release)">
-					<div class="overlay-text">
-						<div class="selector">
-							{{release | isSelectedRelease | selectedIndicator}}
+	<div id="no-releases"
+		ng-if="!releases_ctrl.releases.length && !ctrl.loading_state.loading">
+		<h1>Sorry dawg</h1>
+		<h3>I couldn't find any releases with these criteria :(</h3>
+	</div>
+
+	<div ng-if="releases_ctrl.releases.length">
+		<div class="release-wrapper"
+			ng-repeat="release in releases_ctrl.releases">
+			<div class="release" ng-class="{ selected: (release | isSelectedRelease) }">
+				<div class="cover"
+					title="{{release.artist}} &ndash; {{release.title}}"
+					ng-style="release.cover.cover.thumb.url | backgroundImage">
+
+					<div class="select-overlay"
+						ng-click="releases_ctrl.toggleSelected(release)">
+						<div class="overlay-text">
+							<div class="selector">
+								{{release | isSelectedRelease | selectedIndicator}}
+							</div>
 						</div>
 					</div>
+
+					<div class="selected-overlay"></div>
 				</div>
 
-				<div class="selected-overlay"></div>
-			</div>
-
-			<div class="release-text">
-				<h5 class="release-artist">{{release.artist}}</h5>
-				<h4 class="release-title">{{release.title}}</h4>
+				<div class="release-text">
+					<h5 class="release-artist">{{release.artist}}</h5>
+					<h4 class="release-title">{{release.title}}</h4>
+				</div>
 			</div>
 		</div>
 	</div>

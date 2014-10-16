@@ -3,59 +3,68 @@ angular.module('dripdownode')
 function(LoginSvc, ReleasesSvc, StateSvc) {
 	var _this_ = this;
 
-	this.subscriptions = null;
-	this.visible_releases = null;
-	this.selected_count = 0;
+	// just a reference to the subscriptions object from the global user data
+	this.subscriptions = null; 
+
+	this.subscription = null;
+	this.page = 1;
 	this.query = '';
+
+	this.releases = null;
+	this.selected_count = 0;
 
 // ==================================== API ====================================
 
-	this.filterBySubscription = filterBySubscription;
+	this.setActiveSub = setActiveSub;
+	this.setFilterQuery = setFilterQuery;
+	this.seek = seek;
 	this.toggleSelected = toggleSelected;
-	this.filterByQuery = filterByQuery;
 
 // ==================================== Init ===================================
 
 	StateSvc.setLoadingState(true, 'Fetching user data');
-	LoginSvc.fetchLoginState()
+	LoginSvc.getUserData()
 	.success(function(user_data) {
 		_this_.subscriptions = user_data.memberships;
-		filterBySubscription(_this_.subscriptions[0]);
+		setActiveSub(null);
 	});
 	// error is handled by the LoginService
 
 // ============================ Function definitions ===========================
-
-	function _setActiveReleasePage(sub, page) {
-		StateSvc.setLoadingState(true, 'Loading releases');
-
-		ReleasesSvc.getReleases(sub, page)
-		.then(function(response) {
-			_this_.visible_releases = response.data;
-		})
-		.finally(function() {
-			StateSvc.setLoadingState(false);
-		});
-	}
 
 	function toggleSelected(release) {
 		ReleasesSvc.toggleSelected(release);
 		_this_.selected_count = Number(ReleasesSvc.getSelectedCount());
 	}
 
-	function filterBySubscription(selected_sub) {
-		// TODO null check to set to 'all subscriptions'!
-		if(selected_sub == null) return;
-
-		// Set active state to true, false for all other subscriptions
-		_.each(_this_.subscriptions, function(sub, i) {
-			sub.active = (sub === selected_sub);
-		});
-		_setActiveReleasePage(selected_sub, 1);
+	function seek(forward) {
+		var new_page = _this_.page + (forward ? 1 : -1);
+		_fetchReleases(_this_.subscription, new_page, _this_.query);
 	}
 
-	function filterByQuery() {
-		var query = _this_.query;
+	function setActiveSub(selected_sub) {
+		_fetchReleases(selected_sub, 1, '');
+	}
+
+	function setFilterQuery() {
+		var query = _this_.query.trim();
+		_fetchReleases(_this_.subscription, 1, query);
+	}
+
+	function _fetchReleases(sub, page, query) {
+		StateSvc.setLoadingState(true, 'Loading releases');
+
+		_this_.subscription = sub;
+		_this_.page = Math.max(1, Number(page));
+		_this_.query = query;
+
+		ReleasesSvc.getReleases(sub, _this_.page, query)
+		.then(function(releases) {
+			_this_.releases = releases;
+		})
+		.finally(function() {
+			StateSvc.setLoadingState(false);
+		});
 	}
 }]);
 
