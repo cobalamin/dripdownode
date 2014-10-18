@@ -6,7 +6,6 @@ button {
 	@include colors-accent2;
 
 	&:active, &:focus { outline: 0 none; }
-	transition: all .05s linear;
 }
 
 input, button {

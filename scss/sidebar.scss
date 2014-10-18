@@ -69,13 +69,9 @@ form#release-filter {
 
 	@include colors-accent2;
 	@include rounded-shadow-button(5px);
-
-	&:active {
-		margin-left: $whitespace + 3px;
-	}
 }
 
-#logout-button {
+#logout-button, #show-downloads-button {
 	padding: 0.3em 0.5em;
 	@include rounded-shadow-button(3px);
 }
