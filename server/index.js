@@ -1,11 +1,15 @@
 var express = require('express')
 	, app = express()
-	, http = require('http').Server(app)
-	, Q = require('q')
-	, Proxy = require('http-proxy')
-	, https = require('https');
 
-var ROOT = GLOBAL.proj_root
+	, httpServer = require('http').Server(app)
+	, https = require('https')
+	, Proxy = require('http-proxy')
+
+	, Q = require('q')
+
+	, downloader = require('./downloader')(httpServer);
+
+const ROOT = GLOBAL.proj_root
 	, SENDFILE_OPTS = { root: ROOT }
 	, PORT = 55221
 	, START_TIMEOUT = 5;
@@ -24,9 +28,9 @@ app.use('/api', function(req, res) {
 // Listen to proxy errors.
 // An ECONNRESET can happen frequently when the connection is closed by the
 // user, e.g. reloading the page when it's still loading. We handle them with
-// just a 500 code response, so that the server doesn't crash when they occur.
+// just an error code response, so that the server doesn't crash when they occur
 proxy.on('error', function(err, req, res) {
-	res.status(500).end();
+	res.status(400).end();
 });
 
 // Static content
@@ -46,16 +50,15 @@ app.use(function (req, res, next) {
 module.exports = {
 	start: function startServer() {
 		return Q.promise(function(resolve, reject) {
-			var timeout = setTimeout(function() {
-				reject('Server did not start within ' + START_TIMEOUT + ' seconds');
-			}, START_TIMEOUT * 1000);
-
-			http.listen(PORT, 'localhost');
-			http.on('listening', function() {
-				clearTimeout(timeout);
+			httpServer.listen(PORT, 'localhost');
+			httpServer.on('listening', function() {
 				console.log('Server listening on port %s', PORT);
-				resolve(http);
+				resolve(httpServer);
 			});
-		});
+		})
+		.timeout(
+			START_TIMEOUT * 1000,
+			'Server did not start within ' + START_TIMEOUT + ' seconds'
+		);
 	}
 }

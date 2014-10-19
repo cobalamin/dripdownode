@@ -1,5 +1,8 @@
 angular.module('dripdownode')
-.controller('ReleasesController', ['LoginService', 'ReleasesService', 'StateService',
+.controller('ReleasesController', [
+	'LoginService',
+	'ReleasesService',
+	'StateService',
 function(LoginSvc, ReleasesSvc, StateSvc) {
 	var _this_ = this;
 
