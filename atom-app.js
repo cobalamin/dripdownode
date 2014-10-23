@@ -19,6 +19,7 @@ app.on('ready', function() {
 	mainWindow.on('closed', function() { mainWindow = null; });
 
 	mainWindow.loadUrl('file://' + __dirname + '/server/static/loading.html');
+
 	require('./server').start()
 	.then(function(httpServer) {
 		// Save server object, to close it later

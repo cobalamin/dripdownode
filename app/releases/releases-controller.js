@@ -23,6 +23,10 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	this.seek = seek;
 	this.toggleSelected = toggleSelected;
 
+	this.downloadAll = function() {
+		StateSvc.getUserData();
+	};
+
 // ==================================== Init ===================================
 
 	StateSvc.setLoadingState(true, 'Fetching user data');

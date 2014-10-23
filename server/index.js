@@ -1,21 +1,20 @@
 var express = require('express')
 	, app = express()
 
-	, httpServer = require('http').Server(app)
+	, http = require('http')
 	, https = require('https')
-	, Proxy = require('http-proxy')
+	, httpServer = http.Server(app)
+	, HTTPProxy = require('http-proxy')
 
-	, Q = require('q')
+	, Q = require('q');
 
-	, downloader = require('./downloader')(httpServer);
-
-const ROOT = GLOBAL.proj_root
+var ROOT = GLOBAL.proj_root
 	, SENDFILE_OPTS = { root: ROOT }
 	, PORT = 55221
 	, START_TIMEOUT = 5;
 
 // Proxy all /api requests to drip.fm
-var proxy = Proxy.createServer();
+var proxy = HTTPProxy.createServer();
 app.use('/api', function(req, res) {
 	proxy.web(req, res, {
 		target: 'https://drip.fm/api',
