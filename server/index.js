@@ -1,18 +1,21 @@
 var express = require('express')
 	, app = express()
-
 	, httpServer = require('http').Server(app)
+
+	, io = require('socket.io')(httpServer)
+	, downloader = require('./downloader')
+
 	, https = require('https')
 	, Proxy = require('http-proxy')
 
-	, Q = require('q')
-
-	, downloader = require('./downloader')(httpServer);
+	, Q = require('q');
 
 const ROOT = GLOBAL.proj_root
 	, SENDFILE_OPTS = { root: ROOT }
 	, PORT = 55221
 	, START_TIMEOUT = 5;
+
+// =============================== Drip.fm proxy ===============================
 
 // Proxy all /api requests to drip.fm
 var proxy = Proxy.createServer();
@@ -30,8 +33,20 @@ app.use('/api', function(req, res) {
 // user, e.g. reloading the page when it's still loading. We handle them with
 // just an error code response, so that the server doesn't crash when they occur
 proxy.on('error', function(err, req, res) {
+	console.error("Proxy error:", err);
 	res.status(400).end();
 });
+proxy.on('proxyRes', function (e, req, res) {
+	var cookie = req.headers.cookie; // TODO we might need to "extract" this
+});
+
+// =========================== Socket Download Server ==========================
+
+io.on('connection', function(socket) {
+	downloader.setUpListeners(socket);
+});
+
+// ============================= Local HTTP Server =============================
 
 // Static content
 app.use('/components', express.static(ROOT + '/components'));

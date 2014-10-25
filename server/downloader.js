@@ -1,7 +1,6 @@
 var async = require('async')
 	, Q = require('q')
-	, request = require('request')
-	, SocketIO = require('socket.io');
+	, request = require('request');
 
 // Config
 const CONCURRENCY = 3;
@@ -10,14 +9,8 @@ const CONCURRENCY = 3;
 var current_queue = null;
 var io = null;
 
-module.exports = function createDownloadServer(httpServer) {
-	if(io) {
-		throw new Error('Socket.IO server already running');
-		return;
-	}
-
-	io = SocketIO(httpServer);
-	io.on('connection', function(socket) {
+module.exports = {
+	setUpListeners: function setUpListeners(socket) {
 		console.log('User connected through Socket.IO');
 
 		socket.emit('ohai', {'d': 'awg'});
@@ -35,18 +28,13 @@ module.exports = function createDownloadServer(httpServer) {
 				socket.emit('dl:error', e);
 			}
 		});
-	});
-
-	console.log('Socket.IO server created');
-
-	return io;
+	}
 };
 
 function downloadRelease(release, cookie) {
 	return Q.promise(function(resolve, reject, notify) {
 		var req = request({
-			url: getDownloadURL(release),
-			headers: { 'Cookie': String(cookie) }
+			url: getDownloadURL(release)
 		});
 
 		req.on('response', function(res) {

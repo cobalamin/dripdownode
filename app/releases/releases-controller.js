@@ -29,9 +29,8 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	LoginSvc.getUserData()
 	.success(function(user_data) {
 		_this_.subscriptions = user_data.memberships;
-		setActiveSub(null);
+		setActiveSub(null); // Set 'all subscriptions' to be active
 	});
-	// error is handled by the LoginService
 
 // ============================ Function definitions ===========================
 
@@ -61,7 +60,7 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 		_this_.page = Math.max(1, Number(page));
 		_this_.query = query;
 
-		ReleasesSvc.getReleases(sub, _this_.page, query)
+		ReleasesSvc.getReleases(_this_.subscription, _this_.page, _this_.query)
 		.then(function(releases) {
 			_this_.releases = releases;
 		})
