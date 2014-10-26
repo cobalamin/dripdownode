@@ -1,0 +1,24 @@
+<div id="content">
+	<div id="downloads-info">
+		<div id="downloads-total">
+			{{dl_ctrl.releases | doneDownloads}} of {{dl_ctrl.releases | objectLength}}
+		</div>
+	</div>
+
+	<div ng-repeat="release in dl_ctrl.releases" class="release-download">
+		<div class="cover-wrapper">
+			<div class="cover"
+				ng-style="release.cover.cover.thumb.url | backgroundImage"></div>
+		</div>
+
+		<div class="info-wrapper">
+			<div class="release-info">{{release.artist}} — {{release.title}}</div>
+			<div class="download-state">{{release.download.state || "Waiting"}}</div>
+			<div class="download-progress">
+				<div class="progress-bar"
+				ng-class="release.download | progressClass"
+				ng-style="release.download.progress | progressWidth"></div>
+			</div>
+		</div>
+	</div>
+</div>

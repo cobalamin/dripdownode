@@ -2,12 +2,13 @@ angular.module('dripdownode')
 .factory('ReleasesService', ['$http', '$q', 'LoginService',
 function($http, $q, LoginSvc) {
 	var _this_ = this;
-	var selectedReleases = new Map();
+	var selectedReleases = {};
 
 // ==================================== API ====================================
 
 	return {
 		getReleases: getReleases,
+		getSelectedReleases: getSelectedReleases,
 		toggleSelected: toggleSelected,
 		isSelected: isSelected,
 		getSelectedCount: getSelectedCount
@@ -16,20 +17,24 @@ function($http, $q, LoginSvc) {
 // ============================ Function definitions ===========================
 
 	function toggleSelected(release) {
-		if( selectedReleases.has(release.id) ) {
-			selectedReleases.delete(release.id);
+		if( selectedReleases[release.id] ) {
+			delete selectedReleases[release.id];
 		}
 		else {
-			selectedReleases.set(release.id, release);
+			selectedReleases[release.id] = release;
 		}
 	}
 
 	function getSelectedCount() {
-		return selectedReleases.size;
+		return Object.keys(selectedReleases).length;
 	}
 
 	function isSelected(release) {
-		return selectedReleases.has(release.id);
+		return !!selectedReleases[release.id];
+	}
+
+	function getSelectedReleases() {
+		return selectedReleases;
 	}
 
 	function getReleases(sub, page, query) {

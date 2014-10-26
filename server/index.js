@@ -36,13 +36,16 @@ proxy.on('error', function(err, req, res) {
 	console.error("Proxy error:", err);
 	res.status(400).end();
 });
+
+module.exports.cookie = { value: '' };
 proxy.on('proxyRes', function (e, req, res) {
-	var cookie = req.headers.cookie; // TODO we might need to "extract" this
+	downloader.setCookie(req.headers.cookie);
 });
 
 // =========================== Socket Download Server ==========================
 
 io.on('connection', function(socket) {
+	console.log('User connected to the socket server');
 	downloader.setUpListeners(socket);
 });
 

@@ -29,15 +29,20 @@
 
 	<p class="sidebar-text">
 		{{releases_ctrl.selected_count}} selected for download
-		<button id="show-downloads-button" ng-click="ctrl.TODO()">Show</button>
+		<button id="show-downloads-button"
+			ng-disabled="!releases_ctrl.selected_count"
+			ng-click="releases_ctrl.showSelected()">
+			Show</button>
 	</p>
 
-	<button id="download-button">
+	<button id="download-button"
+		ng-disabled="!releases_ctrl.selected_count"
+		ng-click="releases_ctrl.downloadAll()">
 		GET 'EM ALL
 	</button>
 </div>
 <div id="content">
-	<div id="page-navigation">
+	<div id="page-navigation" ng-if="releases_ctrl.page > -1">
 		<button id="prev-page" ng-click="releases_ctrl.seek(false)"
 			ng-show="releases_ctrl.page && releases_ctrl.page > 1">
 			&laquo; Previous</button>

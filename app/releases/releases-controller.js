@@ -3,7 +3,8 @@ angular.module('dripdownode')
 	'LoginService',
 	'ReleasesService',
 	'StateService',
-function(LoginSvc, ReleasesSvc, StateSvc) {
+	'$location',
+function(LoginSvc, ReleasesSvc, StateSvc, $location) {
 	var _this_ = this;
 
 	// just a reference to the subscriptions object from the global user data
@@ -18,6 +19,8 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 
 // ==================================== API ====================================
 
+	this.showSelected = showSelected;
+	this.downloadAll = downloadAll;
 	this.setActiveSub = setActiveSub;
 	this.setFilterQuery = setFilterQuery;
 	this.seek = seek;
@@ -33,6 +36,26 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	});
 
 // ============================ Function definitions ===========================
+
+	function downloadAll() {
+		$location.path('/download');
+	}
+
+	function showSelected() {
+		_this_.page = -1;
+		_this_.subscription = null;
+
+		var releases = ReleasesSvc.getSelectedReleases();
+
+		_this_.releases = _(Object.keys(releases))
+			.map(function(key) {
+				return releases[key];
+			})
+			.sort(function(release) {
+				return release.id;
+			})
+			.value();
+	}
 
 	function toggleSelected(release) {
 		ReleasesSvc.toggleSelected(release);
@@ -56,13 +79,12 @@ function(LoginSvc, ReleasesSvc, StateSvc) {
 	function _fetchReleases(sub, page, query) {
 		StateSvc.setLoadingState(true, 'Loading releases');
 
-		_this_.subscription = sub;
-		_this_.page = Math.max(1, Number(page));
-		_this_.query = query;
-
 		ReleasesSvc.getReleases(_this_.subscription, _this_.page, _this_.query)
 		.then(function(releases) {
 			_this_.releases = releases;
+			_this_.subscription = sub;
+			_this_.page = Math.max(1, Number(page));
+			_this_.query = query;
 		})
 		.finally(function() {
 			StateSvc.setLoadingState(false);

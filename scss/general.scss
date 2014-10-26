@@ -1,9 +1,12 @@
 // Forms and Buttons
 button {
 	cursor: pointer;
-	background: #00f;
 	border: 0px none;
 	@include colors-accent2;
+
+	&[disabled] {
+		background: grayscale($accent2) !important;
+	}
 
 	&:active, &:focus { outline: 0 none; }
 }

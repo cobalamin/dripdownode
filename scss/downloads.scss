@@ -1,0 +1,79 @@
+#downloads-info {
+	&, * { text-align: center; }
+
+	#downloads-total {
+		font-size: 2em;
+	}
+}
+
+.release-download {
+	display: table;
+	width: 100%;
+
+	margin-bottom: 1em;
+
+	$download-height: 100px;
+	height: $download-height;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	.cover-wrapper, .info-wrapper {
+		display: table-cell;
+		vertical-align: middle;
+	}
+
+	.cover-wrapper {
+		width: $download-height;
+		height: $download-height;
+
+		.cover {
+			cursor: default;
+		}
+
+		margin-right: 1em;
+	}
+
+	.info-wrapper {
+		padding: 0 1em;
+
+		.release-info {
+			margin-bottom: 1.2em;
+		}
+
+		.download-state {
+			font-size: 0.7em;
+			text-transform: uppercase;
+			color: #777;
+			margin-bottom: 0.5em;
+		}
+	}
+}
+
+.download-progress {
+	width: 100%;
+	height: 5px;
+	background: #eee;
+
+	position: relative;
+
+	.progress-bar {
+		position: absolute;
+		top: 0; left: 0;
+		height: 100%;
+
+		&.success-progress {
+			background-color: #5cb85c;
+		}
+
+		&.unknown-progress {
+			background-color: #f0ad4e;
+			width: 100% !important;
+		}
+
+		&.error-progress {
+			background-color: #d9534f;
+			width: 100% !important;
+		}
+	}
+}

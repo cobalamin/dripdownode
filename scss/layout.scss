@@ -24,8 +24,9 @@ $sidebar-width: 300px;
 
 // The content
 #content {
-	float: left;
 	padding: $whitespace;
-
+	width: 100%;
+}
+#sidebar + #content {
 	width: calc(100% - #{$sidebar-width});
 }

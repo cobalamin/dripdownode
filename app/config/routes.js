@@ -8,4 +8,10 @@ function($routeProvider, $locationProvider) {
 		controller: 'ReleasesController',
 		controllerAs: 'releases_ctrl'
 	});
+
+	$routeProvider.when('/download', {
+		templateUrl: 'templates/download.html',
+		controller: 'DownloadsController',
+		controllerAs: 'dl_ctrl'
+	});
 }]);
