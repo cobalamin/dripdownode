@@ -2,6 +2,7 @@ GLOBAL.proj_root = __dirname;
 
 var crash_reporter = require('crash-reporter')
 	, app = require('app')
+	, Dialog = require('dialog')
 	, BrowserWindow = require('browser-window');
 
 crash_reporter.start();

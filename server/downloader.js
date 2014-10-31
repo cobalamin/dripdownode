@@ -33,7 +33,7 @@ module.exports = {
 		});
 	},
 	setCookie: function(c) {
-		if(c.trim()) {
+		if(c && c.trim()) {
 			cookie = c.trim();
 		}
 	}

@@ -3,6 +3,14 @@ angular.module('dripdownode')
 function($routeProvider, $locationProvider) {
 	$locationProvider.html5Mode(true);
 
+	$routeProvider.when('/', {
+		resolve: {
+			'downloadDir': function(SettingsService) {
+				return SettingsService.chooseDownloadDir();
+			}
+		}
+	});
+
 	$routeProvider.when('/select', {
 		templateUrl: 'templates/select.html',
 		controller: 'ReleasesController',
