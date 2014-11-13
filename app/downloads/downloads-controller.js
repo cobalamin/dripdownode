@@ -41,7 +41,9 @@ function(ReleasesSvc, SocketSvc, $scope) {
 // ============================ Function definitions ===========================
 
 	function _getReleaseAndDo(fn) {
-		if(!fn) return function(){};
+		if(typeof fn !== 'function') {
+			throw new Error("No valid function passed to _getReleaseAndDo");
+		}
 
 		return function(data) {
 			var release = _this_.releases[data.id];

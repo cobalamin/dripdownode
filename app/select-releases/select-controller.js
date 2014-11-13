@@ -1,15 +1,17 @@
 angular.module('dripdownode')
-.controller('ReleasesController', [
+.controller('SelectController', [
 	'LoginService',
 	'ReleasesService',
-	'StateService',
+	'LoadingOverlay',
 	'$location',
-function(LoginSvc, ReleasesSvc, StateSvc, $location) {
+function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
 	var _this_ = this;
 
-	// just a reference to the subscriptions object from the global user data
-	this.subscriptions = null; 
+	this.loaded = false;
 
+	this.user_data = null;
+
+	// current state
 	this.subscription = null;
 	this.page = 1;
 	this.query = '';
@@ -26,14 +28,31 @@ function(LoginSvc, ReleasesSvc, StateSvc, $location) {
 	this.seek = seek;
 	this.toggleSelected = toggleSelected;
 
+	this.logout = LoginSvc.logout;
+
 // ==================================== Init ===================================
 
-	StateSvc.setLoadingState(true, 'Fetching user data');
-	LoginSvc.getUserData()
-	.success(function(user_data) {
-		_this_.subscriptions = user_data.memberships;
-		setActiveSub(null); // Set 'all subscriptions' to be active
-	});
+	(function fetchSettings() {
+		// TODO
+	})();
+
+	(function fetchUserData() {
+		LoadingOverlay.start('Fetching user data');
+		LoginSvc.getUserData()
+		.then(function(response) {
+			_this_.user_data = response.data;
+
+			setActiveSub(null) // Set 'all subscriptions' to be active
+			.finally(function() {
+				// The controller is fully loaded after the first release fetch
+				_this_.loaded = true;
+				LoadingOverlay.stop();
+			});
+		}, function() {
+			$location.path('/login');
+			LoadingOverlay.stop();
+		});
+	})();
 
 // ============================ Function definitions ===========================
 
@@ -64,30 +83,31 @@ function(LoginSvc, ReleasesSvc, StateSvc, $location) {
 
 	function seek(forward) {
 		var new_page = _this_.page + (forward ? 1 : -1);
-		_fetchReleases(_this_.subscription, new_page, _this_.query);
+		return _fetchReleases(_this_.subscription, new_page, _this_.query);
 	}
 
 	function setActiveSub(selected_sub) {
-		_fetchReleases(selected_sub, 1, '');
+		return _fetchReleases(selected_sub, 1, '');
 	}
 
 	function setFilterQuery() {
 		var query = _this_.query.trim();
-		_fetchReleases(_this_.subscription, 1, query);
+		return _fetchReleases(_this_.subscription, 1, query);
 	}
 
 	function _fetchReleases(sub, page, query) {
-		StateSvc.setLoadingState(true, 'Loading releases');
+		var get_promise = ReleasesSvc.getReleases(sub, page, query);
+		LoadingOverlay.start('Loading releases').then(function() {
+			get_promise.finally(LoadingOverlay.stop);
+		});
 
-		ReleasesSvc.getReleases(_this_.subscription, _this_.page, _this_.query)
-		.then(function(releases) {
+		return get_promise.then(function(releases) {
 			_this_.releases = releases;
 			_this_.subscription = sub;
 			_this_.page = Math.max(1, Number(page));
 			_this_.query = query;
-		})
-		.finally(function() {
-			StateSvc.setLoadingState(false);
+
+			return releases;
 		});
 	}
 }]);

@@ -1,1 +1,1 @@
-angular.module('dripdownode', ['ngRoute']);
+angular.module('dripdownode', ['ngRoute', 'btford.modal']);

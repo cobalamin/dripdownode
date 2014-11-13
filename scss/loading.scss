@@ -1,5 +1,5 @@
-// The spinner overlay
-#spinner-overlay {
+// The loading spinner overlay
+#loading-overlay {
 	position: fixed;
 	z-index: 9001;
 	top: 0; left: 0;
@@ -7,7 +7,7 @@
 
 	background: $drip-background;
 
-	#spinner-message {
+	#loading-message {
 		position: absolute;
 		left: 50%; transform: translateX(-50%);
 		top: calc(50% + 50px);

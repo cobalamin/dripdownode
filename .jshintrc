@@ -1,4 +1,5 @@
 {
 	"eqnull": true,
-	"debug": true
+	"debug": true,
+	"esnext": true
 }

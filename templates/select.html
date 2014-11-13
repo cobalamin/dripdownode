@@ -1,25 +1,25 @@
-<div id="sidebar">
+<div id="sidebar" ng-show="sel_ctrl.loaded">
 	<p class="sidebar-text">
-		Hi, {{ctrl.user.data.firstname}}!
-		<button id="logout-button" ng-click="ctrl.logout()">Log out</button>
+		Hi, {{sel_ctrl.user_data.firstname}}!
+		<button id="logout-button" ng-click="sel_ctrl.logout()">Log out</button>
 	</p>
 
 	<form id="release-filter"
-		ng-submit="releases_ctrl.setFilterQuery()">
+		ng-submit="sel_ctrl.setFilterQuery()">
 		<input placeholder="Search for releases..."
-			type="text" ng-model="releases_ctrl.query">
+			type="text" ng-model="sel_ctrl.query">
 	</form>
 
 	<div class="subscription"
-		ng-click="releases_ctrl.setActiveSub(null)"
-		ng-class="{ active: releases_ctrl.subscription === null }">
+		ng-click="sel_ctrl.setActiveSub(null)"
+		ng-class="{ active: sel_ctrl.subscription === null }">
 		<div class="subscription-thumb"
-			ng-style="ctrl.user.data.avatar_url | backgroundImage"></div>
+			ng-style="sel_ctrl.user_data.avatar_url | backgroundImage"></div>
 		All Subscriptions</div>
-	<div ng-repeat="sub in releases_ctrl.subscriptions"
-		ng-click="releases_ctrl.setActiveSub(sub)"
+	<div ng-repeat="sub in sel_ctrl.user_data.memberships"
+		ng-click="sel_ctrl.setActiveSub(sub)"
 		class="subscription"
-		ng-class="{ active: releases_ctrl.subscription === sub }">
+		ng-class="{ active: sel_ctrl.subscription === sub }">
 		<div ng-style="sub.creative.avatar_thumb_url | backgroundImage"
 			class="subscription-thumb"></div>
 		{{sub.creative.service_name}}
@@ -28,46 +28,47 @@
 	<hr>
 
 	<p class="sidebar-text">
-		{{releases_ctrl.selected_count}} selected for download
+		{{sel_ctrl.selected_count}} selected for download
 		<button id="show-downloads-button"
-			ng-disabled="!releases_ctrl.selected_count"
-			ng-click="releases_ctrl.showSelected()">
+			ng-disabled="!sel_ctrl.selected_count"
+			ng-click="sel_ctrl.showSelected()">
 			Show</button>
 	</p>
 
 	<button id="download-button"
-		ng-disabled="!releases_ctrl.selected_count"
-		ng-click="releases_ctrl.downloadAll()">
+		ng-disabled="!sel_ctrl.selected_count"
+		ng-click="sel_ctrl.downloadAll()">
 		GET 'EM ALL
 	</button>
 </div>
-<div id="content">
-	<div id="page-navigation" ng-if="releases_ctrl.page > -1">
-		<button id="prev-page" ng-click="releases_ctrl.seek(false)"
-			ng-show="releases_ctrl.page && releases_ctrl.page > 1">
+
+<div id="content" ng-show="sel_ctrl.loaded">
+	<div id="page-navigation" ng-if="sel_ctrl.page > -1">
+		<button id="prev-page" ng-click="sel_ctrl.seek(false)"
+			ng-show="sel_ctrl.page && sel_ctrl.page > 1">
 			&laquo; Previous</button>
-		<button id="next-page" ng-click="releases_ctrl.seek(true)"
-			ng-show="releases_ctrl.releases.length == 20">
+		<button id="next-page" ng-click="sel_ctrl.seek(true)"
+			ng-show="sel_ctrl.releases.length == 20">
 			Next &raquo;</button>
-		<div id="current-page"><div>{{releases_ctrl.page}}</div></div>
+		<div id="current-page"><div>{{sel_ctrl.page}}</div></div>
 	</div>
 
 	<div id="no-releases"
-		ng-if="!releases_ctrl.releases.length && !ctrl.loading_state.loading">
+		ng-if="!sel_ctrl.releases.length">
 		<h1>Sorry dawg</h1>
 		<h3>I couldn't find any releases with these criteria :(</h3>
 	</div>
 
-	<div ng-if="releases_ctrl.releases.length">
+	<div ng-if="sel_ctrl.releases.length">
 		<div class="release-wrapper"
-			ng-repeat="release in releases_ctrl.releases">
+			ng-repeat="release in sel_ctrl.releases">
 			<div class="release" ng-class="{ selected: (release | isSelectedRelease) }">
 				<div class="cover"
 					title="{{release.artist}} &ndash; {{release.title}}"
 					ng-style="release.cover.cover.thumb.url | backgroundImage">
 
 					<div class="select-overlay"
-						ng-click="releases_ctrl.toggleSelected(release)">
+						ng-click="sel_ctrl.toggleSelected(release)">
 						<div class="overlay-text">
 							<div class="selector">
 								{{release | isSelectedRelease | selectedIndicator}}

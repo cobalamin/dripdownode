@@ -40,18 +40,20 @@ function($http, $q, LoginSvc) {
 	function getReleases(sub, page, query) {
 		page = Math.max(1, Number(page));
 
-		return $q(function(resolve, reject) {
-			LoginSvc.getUserData()
-			.then(function(response) {
-				var url = '/api/users/' + response.data.id + '/releases';
-				if(sub != null) { url += '/creatives/' + sub.creative_id; }
-				url += '?page=' + page;
-				if(query) { url += '&q=' + query; }
+		var deferred = $q.defer();
 
-				$http.get(url)
-				.success(resolve)
-				.error(reject);
-			}, reject);
-		});
+		LoginSvc.getUserData()
+		.then(function(response) {
+			var url = '/api/users/' + response.data.id + '/releases';
+			if(sub != null) { url += '/creatives/' + sub.creative_id; }
+			url += '?page=' + page;
+			if(query) { url += '&q=' + query; }
+
+			$http.get(url)
+				.success(deferred.resolve)
+				.error(deferred.reject);
+		}, deferred.reject);
+
+		return deferred.promise;
 	}
 }]);

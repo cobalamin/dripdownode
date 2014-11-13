@@ -4,22 +4,23 @@ function($routeProvider, $locationProvider) {
 	$locationProvider.html5Mode(true);
 
 	$routeProvider.when('/', {
-		resolve: {
-			'downloadDir': function(SettingsService) {
-				return SettingsService.chooseDownloadDir();
-			}
-		}
-	});
-
-	$routeProvider.when('/select', {
 		templateUrl: 'templates/select.html',
-		controller: 'ReleasesController',
-		controllerAs: 'releases_ctrl'
-	});
-
-	$routeProvider.when('/download', {
+		controller: 'SelectController',
+		controllerAs: 'sel_ctrl'
+	})
+	.when('/download', {
 		templateUrl: 'templates/download.html',
 		controller: 'DownloadsController',
 		controllerAs: 'dl_ctrl'
+	})
+	.when('/login', {
+		templateUrl: 'templates/login.html',
+		controller: 'LoginController',
+		controllerAs: 'login_ctrl'
+	})
+	.when('/settings', {
+		templateUrl: 'templates/settings.html',
+		controller: 'SettingsController',
+		controllerAs: 'set_ctrl'
 	});
 }]);

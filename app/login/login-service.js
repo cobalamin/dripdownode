@@ -1,17 +1,22 @@
 angular.module('dripdownode')
-.factory('LoginService', ['$http', '$window', 'StateService',
-function($http, $window, StateSvc) {
+.factory('LoginService', ['$http', '$window', '$q',
+function($http, $window, $q) {
+	var cached_userdata = null;
+
 	return {
 		login: login,
 		logout: logout,
-		fetchLoginState: fetchLoginState,
-		getUserData: fetchLoginState
+		getUserData: getUserData
 	};
 
 // =============================== Server access ===============================
 
 	function _login(payload) {
-		return $http.post('/api/users/login', payload);
+		var promise = $http.post('/api/users/login', payload);
+		promise.then(function(response) {
+			cached_userdata = response.data;
+		});
+		return promise;
 	}
 
 	function _logout() {
@@ -20,8 +25,13 @@ function($http, $window, StateSvc) {
 
 // =========================== Handling login/logout ===========================
 
-	function fetchLoginState() {
-		return _login({});
+	function getUserData() {
+		if(cached_userdata) {
+			return $q.when({ data: cached_userdata });
+		}
+		else {
+			return _login({});
+		}
 	}
 
 	function login(email, password) {
@@ -29,6 +39,8 @@ function($http, $window, StateSvc) {
 	}
 
 	function logout() {
-		return _logout().then(function() { $window.location.reload(); });
+		return _logout().then(function() {
+			$window.location.reload();
+		});
 	}
 }]);

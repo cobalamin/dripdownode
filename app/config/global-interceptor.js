@@ -1,18 +1,12 @@
 angular.module('dripdownode')
-.factory('authHttpResponseInterceptor', ['$q', 'StateService',
-function($q, StateSvc){
+.factory('authHttpResponseInterceptor', [
+function(){
 	return {
 		response: function(response){
 			if (response.status === 401) {
-				StateSvc.setLoginState(false);
+				$location.path('/login');
 			}
-			return response || $q.when(response);
-		},
-		responseError: function(rejection) {
-			if (rejection.status === 401) {
-				StateSvc.setLoginState(false);
-			}
-			return $q.reject(rejection);
+			return response;
 		}
 	};
 }])
