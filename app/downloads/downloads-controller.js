@@ -13,7 +13,7 @@ function(ReleasesSvc, SocketSvc, $scope) {
 		release.download = release.download || {};
 	});
 
-// ==================================== Init ===================================
+// ----- Init
 
 	SocketSvc.emit('do:download:all', '', _.values(_this_.releases));
 
@@ -38,7 +38,7 @@ function(ReleasesSvc, SocketSvc, $scope) {
 		throw new Error("Downloader is busy!");
 	});
 
-// ============================ Function definitions ===========================
+// ----- Function definitions
 
 	function _getReleaseAndDo(fn) {
 		if(typeof fn !== 'function') {

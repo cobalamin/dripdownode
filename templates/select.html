@@ -1,7 +1,10 @@
 <div id="sidebar" ng-show="sel_ctrl.loaded">
 	<p class="sidebar-text">
 		Hi, {{sel_ctrl.user_data.firstname}}!
-		<button id="logout-button" ng-click="sel_ctrl.logout()">Log out</button>
+		<button class="small-button"
+			ng-click="sel_ctrl.logout()">
+			Log out
+		</button>
 	</p>
 
 	<form id="release-filter"
@@ -29,13 +32,13 @@
 
 	<p class="sidebar-text">
 		{{sel_ctrl.selected_count}} selected for download
-		<button id="show-downloads-button"
+		<button class="small-button"
 			ng-disabled="!sel_ctrl.selected_count"
 			ng-click="sel_ctrl.showSelected()">
 			Show</button>
 	</p>
 
-	<button id="download-button"
+	<button id="download-button" class="fat-button"
 		ng-disabled="!sel_ctrl.selected_count"
 		ng-click="sel_ctrl.downloadAll()">
 		GET 'EM ALL

@@ -15,14 +15,18 @@ input, button {
 	font-family: "Roboto";
 }
 
-form {
-	input, button {
-		display: block;
-		width: 100%;
-		height: 40px;
-		padding: 0 1rem;
-	}
-	input, .error {
-		margin-bottom: $whitespace;
-	}
+.fat-button, .small-button {
+	padding: 0.3em 0.5em;
+}
+.fat-button {
+	height: 40px;
+
+	font-size: 20px;
+	font-family: "Roboto Condensed";
+
+	@include colors-accent2;
+	@include rounded-shadow-button(5px);
+}
+.small-button {
+	@include rounded-shadow-button(3px);
 }

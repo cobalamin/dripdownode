@@ -29,6 +29,7 @@ app.on('ready', function() {
 		// Automatically open dev tools if we're in dev mode
 		if(DEV) mainWindow.toggleDevTools();
 	}, function(error) {
+		mainWindow.toggleDevTools();
 		console.log(error);
 		// Load error page and send error message to it
 		mainWindow.loadUrl('file://' + __dirname + '/server/static/error.html');

@@ -4,7 +4,7 @@ function($http, $q, LoginSvc) {
 	var _this_ = this;
 	var selectedReleases = {};
 
-// ==================================== API ====================================
+// ----- API
 
 	return {
 		getReleases: getReleases,
@@ -14,7 +14,7 @@ function($http, $q, LoginSvc) {
 		getSelectedCount: getSelectedCount
 	};
 
-// ============================ Function definitions ===========================
+// ----- Function definitions
 
 	function toggleSelected(release) {
 		if( selectedReleases[release.id] ) {

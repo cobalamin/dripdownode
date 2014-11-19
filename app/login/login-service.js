@@ -9,7 +9,7 @@ function($http, $window, $q) {
 		getUserData: getUserData
 	};
 
-// =============================== Server access ===============================
+// ----- Server access
 
 	function _login(payload) {
 		var promise = $http.post('/api/users/login', payload);
@@ -23,7 +23,7 @@ function($http, $window, $q) {
 		return $http.get('/api/users/logout');
 	}
 
-// =========================== Handling login/logout ===========================
+// ----- Handling login/logout
 
 	function getUserData() {
 		if(cached_userdata) {

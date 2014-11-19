@@ -1,14 +1,14 @@
 angular.module('dripdownode')
 .controller('SelectController', [
+	'$location',
 	'LoginService',
 	'ReleasesService',
+	'SettingsService',
 	'LoadingOverlay',
-	'$location',
-function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
+function($location, LoginSvc, ReleasesSvc, SettingsSvc, LoadingOverlay) {
 	var _this_ = this;
 
 	this.loaded = false;
-
 	this.user_data = null;
 
 	// current state
@@ -19,7 +19,7 @@ function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
 	this.releases = null;
 	this.selected_count = 0;
 
-// ==================================== API ====================================
+// ----- API
 
 	this.showSelected = showSelected;
 	this.downloadAll = downloadAll;
@@ -30,11 +30,12 @@ function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
 
 	this.logout = LoginSvc.logout;
 
-// ==================================== Init ===================================
+// ----- Init
 
-	(function fetchSettings() {
-		// TODO
-	})();
+	if(!SettingsSvc.isSetUp()) {
+		$location.path('/settings');
+		return;
+	}
 
 	(function fetchUserData() {
 		LoadingOverlay.start('Fetching user data');
@@ -54,7 +55,7 @@ function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
 		});
 	})();
 
-// ============================ Function definitions ===========================
+// ----- Function definitions
 
 	function downloadAll() {
 		$location.path('/download');
@@ -65,15 +66,8 @@ function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
 		_this_.subscription = null;
 
 		var releases = ReleasesSvc.getSelectedReleases();
-
-		_this_.releases = _(Object.keys(releases))
-			.map(function(key) {
-				return releases[key];
-			})
-			.sort(function(release) {
-				return release.id;
-			})
-			.value();
+		// TODO check if functional
+		_this_.releases = _.sort(releases, 'id');
 	}
 
 	function toggleSelected(release) {
@@ -111,4 +105,3 @@ function(LoginSvc, ReleasesSvc, LoadingOverlay, $location) {
 		});
 	}
 }]);
-

@@ -12,13 +12,13 @@ function LoginController(LoginSvc, LoadingOverlay, $location) {
 	};
 	this.message = 'Please log in :)';
 
-// ==================================== API ====================================
+// ----- API
 
 	this.login = login;
 
-// ==================================== Init ===================================
+// ----- Init
 
-// ============================ Function definitions ===========================
+// ----- Function definitions
 
 	function login() {
 		LoadingOverlay.start('Tryna log you in');

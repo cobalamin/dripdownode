@@ -1,0 +1,32 @@
+<h1>Settings</h1>
+
+<form name="form" ng-submit="set_ctrl.tryToSave()">
+	<div class="setting-container" id="setting-download-dir">
+		<h3>Download directory</h3>
+		<input type="text"
+			disabled
+			required
+			ng-model="set_ctrl.settings.dl_dir">
+		<button
+			class="small-button"
+			ng-click="set_ctrl.chooseDownloadDir()">
+			Set Directory
+		</button>
+	</div>
+
+	<div class="setting-container">
+		<h3>Preferred Format Order</h3>
+		<div as-sortable ng-model="set_ctrl.settings.formats">
+			<span ng-repeat="format in set_ctrl.settings.formats" as-sortable-item>
+				<span as-sortable-item-handle>{{format}}</span>
+			</span>
+		</div>
+	</div>
+
+	<div id="save-settings">
+		<button class="fat-button"
+			ng-click="set_ctrl.save()" ng-disabled="form.$invalid">
+			SAVE SETTINGS
+		</button>
+	</div>
+</form>

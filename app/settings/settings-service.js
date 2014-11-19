@@ -1,45 +1,62 @@
 angular.module('dripdownode')
 .factory('SettingsService', ['$q',
 function($q) {
-	const base = 'dripdownode:';
+	var ALL_FORMATS = ['mp3', 'flac', 'aiff', 'wav'];
+
+	localStorage.dripdownode = localStorage.dripdownode || "{}";
+	var storage = JSON.parse(localStorage.dripdownode);
+
+	var defaults = {
+		dl_dir: '',
+		formats: ALL_FORMATS
+	};
+	if(typeof storage.dl_dir !== 'string') {
+		storage.dl_dir = defaults.dl_dir;
+	}
+	if(!Array.isArray(storage.formats)) {
+		storage.formats = defaults.formats;
+	}
+
+// ----- API
 
 	return {
+		isSetUp: isSetUp,
 		get: get,
-		set: set,
-		isSetUp: isSetUp
+		save: save
 	};
 
-	function get(key) {
-		try {
-			return JSON.parse(localStorage[base + key]);
-		} catch(e) {
-			return false;
-		}
-	}
-
-	function set(key, val) {
-		var stringified_val = JSON.stringify(val);
-
-		if(stringified_val != null) {
-			localStorage[base + key] = stringified_val;
-			return true;
-		}
-		else return false;
-	}
+// -----
 
 	function isSetUp() {
-		return !!get('download_dir'); // arbitrary key to check if settings are made
+		return Boolean(
+			(storage.dl_dir && storage.dl_dir.trim()) &&
+			(Array.isArray(storage.formats) && storage.formats.length)
+		);
 	}
 
-	function chooseDownloadDir() {
-		require('dialog').showOpenDialog(mainWindow, {
-			title: "Download directory",
-			defaultPath: process.env.HOME || process.env.USERPROFILE,
-			properties: ['openDirectory']
-		}, function choseDlDirCallback(chosenDirs) {
-			var success = set('download_dir', chosenDirs[0]);
-			// TODO spit this out as validation error instead
-			if(!success) throw new Error("Invalid download directory");
+	function get(key) {
+		if(key) return storage[key];
+		else return storage;
+	}
+
+	function save(new_settings) {
+		var required_keys = _.keys(defaults);
+
+		var success = _.every(required_keys, function(key) {
+			var val = new_settings[key];
+			if(!val) {
+				return false;
+			}
+
+			storage[key] = val;
+			return true;
 		});
+
+		if(success) {
+			console.log('success!', storage);
+			localStorage.dripdownode = JSON.stringify(storage);
+		}
+
+		return success;
 	}
 }]);

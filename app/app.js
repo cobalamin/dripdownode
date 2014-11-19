@@ -1,1 +1,1 @@
-angular.module('dripdownode', ['ngRoute', 'btford.modal']);
+angular.module('dripdownode', ['ngRoute', 'btford.modal', 'ui.sortable']);
