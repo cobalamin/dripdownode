@@ -39,14 +39,15 @@ function($scope, ReleasesSvc, SocketSvc, SettingsSvc) {
 	}));
 
 	SocketSvc.on('dl:error', _getReleaseAndDo(function(release, errorObj) {
-		var error = errorObj.message ? errorObj.message : errorObj.toString();
-
+		var errorMsg;
 		if(release) {
-			release.download.state = "Error: " + error;
+			errorMsg = String(errorObj.message);
+			release.download.state = "Error: " + errorMsg;
 			release.download.error = true;
 		}
 		else {
-			_this_.error = error;
+			errorMsg = String(errorObj);
+			_this_.error = errorMsg;
 		}
 	}));
 

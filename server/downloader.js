@@ -57,6 +57,7 @@ module.exports = {
 };
 
 // ----- FS logic
+
 function checkOrCreateDownloadDir(dir) {
 	return Q.promise(function(resolve) {
 		fs.exists(dir, resolve);
@@ -104,17 +105,15 @@ function getReleaseFormat(settings, release) {
 	});
 }
 
-function downloadRelease(settings, release) {
-	var deferred = Q.defer();
-
-	getReleaseFormat(settings, release)
+function downloadRelease(settings, release, socket) {
+	return getReleaseFormat(settings, release)
 	.then(function(format) {
 		if(!format) {
-			deferred.reject('No available format found');
+			throw new Error('No available format found');
 			return;
 		}
 
-		deferred.notify({ format: format });
+		socket.emit('dl:format', { id: release.id, format: format });
 
 		var file_path = path.join(
 			settings.dl_dir,
@@ -122,54 +121,52 @@ function downloadRelease(settings, release) {
 			release.slug + '.zip'
 		);
 		var write_stream = fs.createWriteStream(file_path);
-		write_stream.on('error', deferred.reject);
+		write_stream.on('error', function(err) { throw err; });
 
 		var req = reqWithCookie({
 			url: getDownloadURL(release, format)
 		});
-		req.on('response', function(res) {
-			if(res.statusCode >= 400) {
-				deferred.reject('Response code ' + res.statusCode);
-				return;
-			}
 
-			req.pipe(write_stream);
+		return Q.promise(function(resolve, reject) {
+			req.on('response', function(res) {
+				if(res.statusCode >= 400) {
+					reject('Response code ' + res.statusCode);
+				}
 
-			var total_length = res.headers['content-length'];
-			if(total_length) {
-				var received_length = 0, last_delta = 0;
-				res.on('data', function(chunk) {
-					received_length += chunk.length;
-					last_delta += chunk.length;
+				req.pipe(write_stream);
 
-					var percentage = received_length / total_length;
-					if(last_delta / total_length >= 0.01 || percentage >= 1) {
-						deferred.notify(percentage);
-						last_delta = 0;
-					}
+				var total_length = res.headers['content-length'];
+				if(total_length) {
+					var received_length = 0, last_delta = 0;
+					res.on('data', function(chunk) {
+						received_length += chunk.length;
+						last_delta += chunk.length;
+
+						var percentage = received_length / total_length;
+						if(last_delta / total_length >= 0.01 || percentage >= 1) {
+							socket.emit('dl:progress', { id: release.id, progress: percentage });
+							last_delta = 0;
+						}
+					});
+				}
+				else {
+					// Make it known that we cannot calculate progress
+					socket.emit('dl:progress', { id: release.id, progress: -1 });
+				}
+
+				res.on('end', function() {
+					req.removeAllListeners();
+					res.removeAllListeners();
+
+					write_stream.end(function() {
+						write_stream.removeAllListeners();
+						resolve();
+					});
 				});
-			}
-			else {
-				// Make it known that we cannot calculate progress
-				deferred.notify(-1);
-			}
-
-			res.on('end', function() {
-				req.removeAllListeners();
-				res.removeAllListeners();
-
-				write_stream.end(function() {
-					write_stream.removeAllListeners();
-					deferred.resolve();
-				});
-			});
-			res.on('error', function(err) {
-				deferred.reject(err);
+				res.on('error', function(err) { throw err; });
 			});
 		});
-	}, deferred.reject);
-
-	return deferred.promise;
+	});
 }
 
 function createQueue(settings, releases, socket) {
@@ -178,21 +175,16 @@ function createQueue(settings, releases, socket) {
 	current_queue = async.queue(function(release, done_callback) {
 		socket.emit('dl:start', { id: release.id });
 
-		downloadRelease(settings, release)
+		downloadRelease(settings, release, socket)
 		.then(
 			function(result) {
 				socket.emit('dl:done', { id: release.id });
 			},
 			function(error) {
-				socket.emit('dl:error', { id: release.id, message: error || "Unknown" });
-			},
-			function(notification) {
-				if(typeof notification === 'number') {
-					socket.emit('dl:progress', { id: release.id, progress: notification });
-				}
-				else if(typeof notification === 'object') {
-					socket.emit('dl:format', { id: release.id, format: notification.format });
-				}
+				socket.emit('dl:error', {
+					id: release.id,
+					message: getErrorMsg(error)
+				});
 			}
 		)
 		.finally(done_callback);
@@ -239,4 +231,13 @@ function reqWithCookie(reqConfig, callback) {
 	_.defaults(reqConfig.headers, { cookie: cookie });
 
 	return request(reqConfig, callback);
+}
+
+function getErrorMsg(err) {
+	if(typeof err === 'object') {
+		return err.message || 'Unknown error';
+	}
+	else {
+		return String(err);
+	}
 }
