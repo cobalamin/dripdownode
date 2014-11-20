@@ -1,7 +1,12 @@
 <div id="content">
 	<div id="downloads-info">
 		<div id="downloads-total">
-			{{dl_ctrl.releases | doneDownloads}} of {{dl_ctrl.releases | objectLength}}
+			<span ng-if="!dl_ctrl.error">
+				{{dl_ctrl.releases | doneDownloads}} of {{dl_ctrl.releases | objectLength}}
+			</span>
+			<span ng-if="dl_ctrl.error">
+				Error: {{dl_ctrl.error}}
+			</span>
 		</div>
 	</div>
 
@@ -12,7 +17,12 @@
 		</div>
 
 		<div class="info-wrapper">
-			<div class="release-info">{{release.artist}} — {{release.title}}</div>
+			<div class="release-info">
+				{{release.artist}} — {{release.title}}
+				<small ng-if="release.download.format">
+					(as {{release.download.format | uppercase}})
+				</small>
+			</div>
 			<div class="download-state">{{release.download.state || "Waiting"}}</div>
 			<div class="download-progress">
 				<div class="progress-bar"

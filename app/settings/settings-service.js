@@ -42,6 +42,7 @@ function($q) {
 	function save(new_settings) {
 		var required_keys = _.keys(defaults);
 
+		// Only save if every required setting key is passed
 		var success = _.every(required_keys, function(key) {
 			var val = new_settings[key];
 			if(!val) {
@@ -53,7 +54,6 @@ function($q) {
 		});
 
 		if(success) {
-			console.log('success!', storage);
 			localStorage.dripdownode = JSON.stringify(storage);
 		}
 

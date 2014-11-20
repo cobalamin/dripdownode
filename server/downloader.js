@@ -1,35 +1,52 @@
 var async = require('async')
+	, path = require('path')
+	, fs = require('fs')
+	, mkdirp = require('mkdirp')
 	, Q = require('q')
 	, request = require('request')
 	, _ = require('lodash-node/modern');
 
-// Config
-const CONCURRENCY = 3;
+// ----- Config
 
-// State
+const CONCURRENCY = 3;
+const baseURL = 'http://localhost:55221';
+
+// ----- State
+
 var current_queue = null;
 var io = null;
 var cookie = '';
+
+// ----- API
 
 module.exports = {
 	setUpListeners: function setUpListeners(socket) {
 		console.log('User connected to socket');
 
-		socket.on('do:download:all', function(cookie, releases) {
-			console.log('Starting download of ' +
-				_.keys(releases).length + ' releases');
-
-			if(!Array.isArray(releases) || typeof cookie != 'string') {
-				socket.emit('dl:error', 'Invalid parameters'); // TODO
+		socket.on('do:download:all', function(settings, releases) {
+			if(!(Array.isArray(releases) && Array.isArray(settings.formats) && settings.dl_dir)) {
+				socket.emit('dl:error', 'Invalid parameters');
 				return;
 			}
 
-			try {
-				var queueCreated = createQueue(releases, socket);
-				if(!queueCreated) socket.emit('dl:busy');
-			} catch(e) {
-				socket.emit('dl:error', { message: e.message });
-			}
+			checkOrCreateDownloadDir(settings.dl_dir)
+			.then(function() {
+				try {
+					var queueCreated = createQueue(settings, releases, socket);
+					if(!queueCreated) {
+						socket.emit('dl:error', 'The downloader is busy!');
+					}
+					else {
+						console.log(
+							'Starting download of ' + _.keys(releases).length + ' releases; ' +
+							'saving in ' + settings.dl_dir
+						);
+					}
+				} catch(e) {
+					socket.emit('dl:error', e.message);
+				}
+			})
+			.done();
 		});
 	},
 	setCookie: function(c) {
@@ -39,20 +56,84 @@ module.exports = {
 	}
 };
 
-function downloadRelease(release) {
-	return Q.promise(function(resolve, reject, notify) {
-		release.format = 'mp3'; // TODO
+// ----- FS logic
+function checkOrCreateDownloadDir(dir) {
+	return Q.promise(function(resolve) {
+		fs.exists(dir, resolve);
+	})
+	.then(function(exists) {
+		if(exists) {
+			return Q.promise(function(resolve, reject) {
+				var full_path = path.join(dir, 'drip_downloads');
+				mkdirp(full_path, function(err) {
+					if(!err) {
+						resolve();
+					}
+					else {
+						reject('Could not create download directory');
+					}
+				});
+			});
+		}
+		else {
+			return Q.when(true);
+		}
+	});
+}
 
-		var req = request({
-			url: getDownloadURL(release),
-			headers: { cookie: cookie }
+// ----- Download/Queueing logic
+
+function getReleaseFormat(settings, release) {
+	return Q.promise(function(resolve, reject) {
+		reqWithCookie({
+			url: getFormatsURL(release),
+			json: true
+		}, function(err, res, formats) {
+			if(err) {
+				reject(err);
+			}
+			else if(res.statusCode >= 400) {
+				reject('Response code ' + res.statusCode + ' for formats');
+			}
+			else {
+				resolve(
+					findFirstAvailableFormat(settings.formats, formats)
+				);
+			}
 		});
+	});
+}
 
+function downloadRelease(settings, release) {
+	var deferred = Q.defer();
+
+	getReleaseFormat(settings, release)
+	.then(function(format) {
+		if(!format) {
+			deferred.reject('No available format found');
+			return;
+		}
+
+		deferred.notify({ format: format });
+
+		var file_path = path.join(
+			settings.dl_dir,
+			'drip_downloads',
+			release.slug + '.zip'
+		);
+		var write_stream = fs.createWriteStream(file_path);
+		write_stream.on('error', deferred.reject);
+
+		var req = reqWithCookie({
+			url: getDownloadURL(release, format)
+		});
 		req.on('response', function(res) {
 			if(res.statusCode >= 400) {
-				reject('Response code ' + res.statusCode);
+				deferred.reject('Response code ' + res.statusCode);
 				return;
 			}
+
+			req.pipe(write_stream);
 
 			var total_length = res.headers['content-length'];
 			if(total_length) {
@@ -61,44 +142,43 @@ function downloadRelease(release) {
 					received_length += chunk.length;
 					last_delta += chunk.length;
 
-					if(last_delta / total_length >= 0.01 || 
-							received_length / total_length >= 1) {
-						notify(received_length / total_length);
+					var percentage = received_length / total_length;
+					if(last_delta / total_length >= 0.01 || percentage >= 1) {
+						deferred.notify(percentage);
 						last_delta = 0;
 					}
 				});
 			}
 			else {
-				notify(-1); // Make it known that we cannot calculate progress
+				// Make it known that we cannot calculate progress
+				deferred.notify(-1);
 			}
 
 			res.on('end', function() {
 				req.removeAllListeners();
 				res.removeAllListeners();
-				resolve();
+
+				write_stream.end(function() {
+					write_stream.removeAllListeners();
+					deferred.resolve();
+				});
 			});
-			res.on('error', function() {
-				console.log('Response error', arguments);
-				reject();
+			res.on('error', function(err) {
+				deferred.reject(err);
 			});
 		});
-	});
+	}, deferred.reject);
+
+	return deferred.promise;
 }
 
-function getDownloadURL(release) {
-	return 'http://localhost:55221/api/creatives/' + // TODO port?
-		release.creative_id + '/releases/' +
-		release.id + '/download'+
-		'?release_format=' + release.format;
-}
-
-function createQueue(releases, socket) {
+function createQueue(settings, releases, socket) {
 	if(current_queue) return false;
 
-	current_queue = async.queue(function(release, callback) {
+	current_queue = async.queue(function(release, done_callback) {
 		socket.emit('dl:start', { id: release.id });
 
-		downloadRelease(release)
+		downloadRelease(settings, release)
 		.then(
 			function(result) {
 				socket.emit('dl:done', { id: release.id });
@@ -106,11 +186,16 @@ function createQueue(releases, socket) {
 			function(error) {
 				socket.emit('dl:error', { id: release.id, message: error || "Unknown" });
 			},
-			function(progress) {
-				socket.emit('dl:progress', { id: release.id, progress: progress });
+			function(notification) {
+				if(typeof notification === 'number') {
+					socket.emit('dl:progress', { id: release.id, progress: notification });
+				}
+				else if(typeof notification === 'object') {
+					socket.emit('dl:format', { id: release.id, format: notification.format });
+				}
 			}
 		)
-		.finally(callback);
+		.finally(done_callback);
 	}, CONCURRENCY);
 
 	// Push all onto queue
@@ -120,7 +205,38 @@ function createQueue(releases, socket) {
 	current_queue.drain = function() {
 		socket.emit('dl:done:all');
 		current_queue = null;
-	}
+	};
 
 	return true;
+}
+
+// ----- Helpers
+
+function getDownloadURL(release, format) {
+	return baseURL + '/api/creatives/' +
+		release.creative_id + '/releases/' +
+		release.id + '/download'+
+		'?release_format=' + format;
+}
+
+function getFormatsURL(release) {
+	return baseURL + '/api/creatives/' +
+		release.creative_id + '/releases/' +
+		release.id + '/formats';
+}
+
+function findFirstAvailableFormat(all_formats, available_formats) {
+	return _(all_formats)
+		.intersection(available_formats)
+		.first();
+}
+
+function reqWithCookie(reqConfig, callback) {
+	if(!reqConfig.headers) {
+		reqConfig.headers = {};
+	}
+
+	_.defaults(reqConfig.headers, { cookie: cookie });
+
+	return request(reqConfig, callback);
 }

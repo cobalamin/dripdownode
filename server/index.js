@@ -6,7 +6,7 @@ var express = require('express')
 	, downloader = require('./downloader')
 
 	, https = require('https')
-	, Proxy = require('http-proxy')
+	, httpProxy = require('http-proxy')
 
 	, Q = require('q');
 
@@ -18,7 +18,7 @@ const ROOT = GLOBAL.proj_root
 // =============================== Drip.fm proxy ===============================
 
 // Proxy all /api requests to drip.fm
-var proxy = Proxy.createServer();
+var proxy = httpProxy.createServer();
 app.use('/api', function(req, res) {
 	proxy.web(req, res, {
 		target: 'https://drip.fm/api',
@@ -79,4 +79,4 @@ module.exports = {
 			'Server did not start within ' + START_TIMEOUT + ' seconds'
 		);
 	}
-}
+};

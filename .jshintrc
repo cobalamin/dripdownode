@@ -1,5 +1,6 @@
 {
 	"eqnull": true,
 	"debug": true,
-	"esnext": true
+	"esnext": true,
+	"laxcomma": true
 }
