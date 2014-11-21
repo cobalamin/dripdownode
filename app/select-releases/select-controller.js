@@ -28,6 +28,7 @@ function($location, LoginSvc, ReleasesSvc, SettingsSvc, LoadingOverlay) {
 	this.seek = seek;
 	this.toggleSelected = toggleSelected;
 
+	this.showSettings = showSettings;
 	this.logout = LoginSvc.logout;
 
 // ----- Init
@@ -61,6 +62,12 @@ function($location, LoginSvc, ReleasesSvc, SettingsSvc, LoadingOverlay) {
 		$location.path('/download');
 	}
 
+	function showSettings() {
+		$location.path('/settings');
+	}
+
+	// -----
+
 	function showSelected() {
 		_this_.page = -1;
 		_this_.subscription = null;
@@ -74,6 +81,8 @@ function($location, LoginSvc, ReleasesSvc, SettingsSvc, LoadingOverlay) {
 		ReleasesSvc.toggleSelected(release);
 		_this_.selected_count = Number(ReleasesSvc.getSelectedCount());
 	}
+
+	// -----
 
 	function seek(forward) {
 		var new_page = _this_.page + (forward ? 1 : -1);
