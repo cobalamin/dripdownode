@@ -31,8 +31,8 @@ function($scope, ReleasesSvc, SocketSvc, SettingsSvc) {
 	SocketSvc.on('dl:progress', _getReleaseAndDo(function(release, data) {
 		if(release) release.download.progress = Number(data.progress);
 	}));
-	SocketSvc.on('dl:done', _getReleaseAndDo(function(release) {
-		if(release) release.download.state = "done";
+	SocketSvc.on('dl:state', _getReleaseAndDo(function(release, data) {
+		if(release) release.download.state = data.state;
 	}));
 	SocketSvc.on('dl:format', _getReleaseAndDo(function(release, data) {
 		if(release) release.download.format = data.format;

@@ -23,6 +23,7 @@
     "lodash": "~2.4.1",
     "es6-shim": "~0.19.1",
     "angular-modal": "https://github.com/pommesgabel/angular-modal.git#409c65ffb4dd01a111e1f91350285ed24b50c979",
-    "ng-sortable": "~1.1.7"
+    "ng-sortable": "~1.1.7",
+    "angular-material": "v0.6.0-rc1"
   }
 }

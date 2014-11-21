@@ -11,12 +11,12 @@ var async = require('async')
 // ----- Config
 
 const CONCURRENCY = 3;
-const baseURL = 'http://localhost:55221';
+const DOWNLOAD_DIR = 'drip_downloads';
+const BASE_URL = 'http://localhost:55221';
 
 // ----- State
 
 var current_queue = null;
-var io = null;
 var cookie = '';
 
 // ----- API
@@ -60,28 +60,18 @@ module.exports = {
 
 // ----- FS logic
 
-function checkOrCreateDownloadDir(dir) {
-	return Q.promise(function(resolve) {
-		fs.exists(dir, resolve);
-	})
-	.then(function(exists) {
-		if(exists) {
-			return Q.promise(function(resolve, reject) {
-				var full_path = path.join(dir, 'drip_downloads');
-				mkdirp(full_path, function(err) {
-					if(!err) {
-						resolve();
-					}
-					else {
-						reject('Could not create download directory');
-					}
-				});
-			});
-		}
-		else {
-			return Q.when(true);
-		}
+function fileExists(filename) {
+	return Q.promise(function(resolve, reject) {
+		fs.exists(filename, function(exists) {
+			if(!exists) reject('File does not exist');
+			else resolve();
+		});
 	});
+}
+
+function checkOrCreateDownloadDir(dir) {
+	var full_path = path.join(dir, DOWNLOAD_DIR);
+	return Q.nfcall(mkdirp, full_path);
 }
 
 // ----- Download/Queueing logic
@@ -112,16 +102,11 @@ function downloadRelease(settings, release, socket) {
 	.then(function(format) {
 		if(!format) {
 			throw new Error('No available format found');
-			return;
 		}
 
 		socket.emit('dl:format', { id: release.id, format: format });
 
-		var file_path = path.join(
-			settings.dl_dir,
-			'drip_downloads',
-			release.slug + '.zip'
-		);
+		var file_path = getDownloadPath(settings, release);
 		var write_stream = fs.createWriteStream(file_path);
 		write_stream.on('error', function(err) { throw err; });
 
@@ -171,24 +156,63 @@ function downloadRelease(settings, release, socket) {
 	});
 }
 
+function extractRelease(settings, release, socket) {
+	var zip_path = getDownloadPath(settings, release);
+	var extract_path = getExtractionPath(settings, release);
+
+	return fileExists(zip_path)
+	.then(function createExtractDir() {
+		return Q.nfcall(mkdirp, extract_path);
+	})
+	.then(function unzipTheArchive() {
+		var read_stream = fs.createReadStream(zip_path);
+		var unzip_stream = unzip.Extract({ path: extract_path });
+
+		return Q.promise(function(resolve, reject) {
+			unzip_stream.on('error', reject);
+			read_stream.on('error', reject);
+
+			unzip_stream.on('close', function() {
+				unzip_stream.removeAllListeners();
+				read_stream.removeAllListeners();
+				resolve();
+			});
+
+			read_stream.pipe(unzip_stream);
+		});
+	})
+	.then(function deleteTheArchive() {
+		return Q.nfcall(fs.unlink, zip_path);
+	});
+}
+
 function createQueue(settings, releases, socket) {
 	if(current_queue) return false;
 
 	current_queue = async.queue(function(release, done_callback) {
-		socket.emit('dl:start', { id: release.id });
+		socket.emit('dl:state', { id: release.id, state: 'downloading' });
 
 		downloadRelease(settings, release, socket)
 		.then(
-			function(result) {
-				socket.emit('dl:done', { id: release.id });
+			function downloadSuccess() {
+				socket.emit('dl:state', { id: release.id, state: 'downloaded' });
 			},
-			function(error) {
-				socket.emit('dl:error', {
-					id: release.id,
-					message: getErrorMsg(error)
-				});
+			function downloadError(error) {
+				socket.emit('dl:error', { id: release.id, message: getErrorMsg(error) });
 			}
 		)
+		.then(function extract() {
+			socket.emit('dl:state', { id: release.id, state: 'extracting' });
+
+			var extract_promise = extractRelease(settings, release, socket);
+			extract_promise.then(function() {
+				socket.emit('dl:state', { id: release.id, state: 'done' });
+			});
+
+			return extract_promise.done();
+		}, function extractError(error) {
+			socket.emit('dl:error', { id: release.id, message: getErrorMsg(error) });
+		})
 		.finally(done_callback);
 	}, CONCURRENCY);
 
@@ -206,33 +230,33 @@ function createQueue(settings, releases, socket) {
 
 // ----- Helpers
 
+// URL
 function getDownloadURL(release, format) {
-	return baseURL + '/api/creatives/' +
+	return BASE_URL + '/api/creatives/' +
 		release.creative_id + '/releases/' +
 		release.id + '/download'+
 		'?release_format=' + format;
 }
-
 function getFormatsURL(release) {
-	return baseURL + '/api/creatives/' +
+	return BASE_URL + '/api/creatives/' +
 		release.creative_id + '/releases/' +
 		release.id + '/formats';
 }
 
 // Path
 function getDownloadPath(settings, release) {
-	return sanitizeFilename(path.join(
+	return path.join(
 		settings.dl_dir,
 		DOWNLOAD_DIR,
-		release.slug + '.zip'
-	));
+		sanitizeFilename(release.slug) + '.zip'
+	);
 }
 function getExtractionPath(settings, release) {
-	return sanitizeFilename(path.join(
+	return path.join(
 		settings.dl_dir,
-		release.artist,
-		release.title
-	));
+		sanitizeFilename(release.artist),
+		sanitizeFilename(release.title)
+	);
 }
 
 // Other

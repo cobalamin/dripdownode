@@ -16,10 +16,20 @@
 	<!-- Angular Sortable -->
 	<script type="text/javascript" src="components/ng-sortable/dist/ng-sortable.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="components/ng-sortable/dist/ng-sortable.min.css">
-	<!-- Lo-Dash, thank you based JDD -->
-	<script src="components/lodash/dist/lodash.js"></script>
+
+	<!-- HammerJS -> Angular Material -->
+	<script>var tmp = module; module = undefined; // deez workarounds doe</script>
+	<script src="components/hammerjs/hammer.js"></script>
+	<script>module = tmp; tmp = undefined;</script>
+	<!-- Angular Material -->
+	<script src="components/angular-aria/angular-aria.js"></script>
+	<script src="components/angular-animate/angular-animate.js"></script>
+	<script src="components/angular-material/angular-material.js"></script>
+	<link rel="stylesheet" href="/bower_components/angular-material/angular-material.css">
 	<!-- Spinner -->
 	<script src="components/spinjs/spin.js"></script>
+	<!-- Lo-Dash, thank you based JDD -->
+	<script src="components/lodash/dist/lodash.js"></script>
 
 	<!-- Own code -->
 	<script src="dist/app.js"></script>
