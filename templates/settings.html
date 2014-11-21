@@ -1,32 +1,38 @@
-<h1>Settings</h1>
-
-<form name="form" ng-submit="set_ctrl.tryToSave()">
-	<div class="setting-container" id="setting-download-dir">
-		<h3>Download directory</h3>
-		<input type="text"
-			disabled
-			required
-			ng-model="set_ctrl.settings.dl_dir">
-		<button
-			class="small-button"
-			ng-click="set_ctrl.chooseDownloadDir()">
-			Set Directory
-		</button>
+<md-toolbar md-theme="indigo">
+	<div class="md-toolbar-tools">
+		<span class="md-flex">
+			Settings
+		</span>
 	</div>
+</md-toolbar>
 
-	<div class="setting-container">
-		<h3>Preferred Format Order</h3>
-		<div as-sortable ng-model="set_ctrl.settings.formats">
-			<span ng-repeat="format in set_ctrl.settings.formats" as-sortable-item>
-				<span as-sortable-item-handle>{{format}}</span>
-			</span>
+<div id="content">
+	<form name="form" ng-submit="set_ctrl.tryToSave()">
+		<div layout="row" layout-padding>
+			<div flex>
+				<h3>Download directory</h3>
+				<md-text-float label="Download directory" disabled required ng-model="set_ctrl.settings.dl_dir"></md-text-float>
+				<md-button ng-click="set_ctrl.chooseDownloadDir()"
+					class="md-raised md-primary">
+					Choose Directory
+				</md-button>
+			</div>
+			
+			<div flex>
+				<h3>Preferred Format Order</h3>
+
+				<div as-sortable ng-model="set_ctrl.settings.formats">
+					<md-card ng-repeat="format in set_ctrl.settings.formats" as-sortable-item class="draggable">
+						<div class="drag-handle" as-sortable-item-handle></div>
+						<span>{{format | uppercase}}</span>
+					</md-card>
+				</div>
+
+				<md-button id="save-settings" ng-click="set_ctrl.save()" ng-disabled="form.$invalid"
+					class="md-raised md-primary">
+					Save Settings
+				</md-button>
+			</div>
 		</div>
-	</div>
-
-	<div id="save-settings">
-		<button class="fat-button"
-			ng-click="set_ctrl.save()" ng-disabled="form.$invalid">
-			SAVE SETTINGS
-		</button>
-	</div>
-</form>
+	</form>
+</div>

@@ -5,16 +5,25 @@ form {
 	input, button {
 		height: 30px;
 	}
-}
 
-.setting-container {
-	width: 100%;
-}
-#setting-download-dir {
-	
+	input {
+		width: 100%;
+	}
+
+	.draggable {
+		position: relative;
+
+		.drag-handle {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+	}
 }
 
 #save-settings {
-	text-align: right;
+	float: right;
 	margin-top: 1em;
 }

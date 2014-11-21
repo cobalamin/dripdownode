@@ -1,15 +1,19 @@
-<div id="content">
-	<div id="downloads-info">
-		<div id="downloads-total">
-			<span ng-if="!dl_ctrl.error">
-				{{dl_ctrl.releases | doneDownloads}} of {{dl_ctrl.releases | objectLength}}
-			</span>
-			<span ng-if="dl_ctrl.error">
-				Error: {{dl_ctrl.error}}
-			</span>
-		</div>
+<md-toolbar ng-if="!dl_ctrl.error">
+	<div class="md-toolbar-tools">
+		<span class="md-flex">
+			{{dl_ctrl.releases | doneDownloads}} of {{dl_ctrl.releases | objectLength}}
+		</span>
 	</div>
+</md-toolbar>
+<md-toolbar md-theme="red" ng-if="dl_ctrl.error">
+	<div class="md-toolbar-tools">
+		<span class="md-flex">
+			Error: {{dl_ctrl.error}}
+		</span>
+	</div>
+</md-toolbar>
 
+<div id="content">
 	<div ng-repeat="release in dl_ctrl.releases" class="release-download">
 		<div class="cover-wrapper">
 			<div class="cover"

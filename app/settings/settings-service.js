@@ -3,8 +3,11 @@ angular.module('dripdownode')
 function($q) {
 	var ALL_FORMATS = ['mp3', 'flac', 'aiff', 'wav'];
 
+	var storage;
 	localStorage.dripdownode = localStorage.dripdownode || "{}";
-	var storage = JSON.parse(localStorage.dripdownode) || {};
+	try {
+		storage = JSON.parse(localStorage.dripdownode) || {};
+	} catch(e) { storage = {}; }
 
 	var defaults = {
 		dl_dir: '',
