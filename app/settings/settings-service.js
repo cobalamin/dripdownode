@@ -4,7 +4,7 @@ function($q) {
 	var ALL_FORMATS = ['mp3', 'flac', 'aiff', 'wav'];
 
 	localStorage.dripdownode = localStorage.dripdownode || "{}";
-	var storage = JSON.parse(localStorage.dripdownode);
+	var storage = JSON.parse(localStorage.dripdownode) || {};
 
 	var defaults = {
 		dl_dir: '',
