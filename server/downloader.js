@@ -1,7 +1,9 @@
 var async = require('async')
 	, path = require('path')
 	, fs = require('fs')
+	, sanitizeFilename = require('sanitize-filename')
 	, mkdirp = require('mkdirp')
+	, unzip = require('unzip')
 	, Q = require('q')
 	, request = require('request')
 	, _ = require('lodash-node/modern');
@@ -217,6 +219,23 @@ function getFormatsURL(release) {
 		release.id + '/formats';
 }
 
+// Path
+function getDownloadPath(settings, release) {
+	return sanitizeFilename(path.join(
+		settings.dl_dir,
+		DOWNLOAD_DIR,
+		release.slug + '.zip'
+	));
+}
+function getExtractionPath(settings, release) {
+	return sanitizeFilename(path.join(
+		settings.dl_dir,
+		release.artist,
+		release.title
+	));
+}
+
+// Other
 function findFirstAvailableFormat(all_formats, available_formats) {
 	return _(all_formats)
 		.intersection(available_formats)
