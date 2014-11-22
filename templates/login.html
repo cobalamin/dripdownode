@@ -6,11 +6,9 @@
 				<form ng-submit="login_ctrl.login()">
 					<div class="error"
 						ng-show="login_ctrl.message">{{login_ctrl.message}}</div>
-					<input type="text" placeholder="Your drip.fm email"
-						ng-model="login_ctrl.user.email">
-					<input type="password" placeholder="Your drip.fm password"
-						ng-model="login_ctrl.user.password">
-					<button>Log in!</button>
+					<md-text-float label="Your drip.fm email" ng-model="login_ctrl.user.email"></md-text-float>
+					<md-text-float label="Your drip.fm password" ng-model="login_ctrl.user.password" type="password"></md-text-float>
+					<md-button class="md-raised md-primary">Log in!</md-button>
 				</form>
 			</div>
 		</div>
