@@ -6,7 +6,7 @@
 	</div>
 </md-toolbar>
 
-<div id="content">
+<md-content layout-padding>
 	<form name="form" ng-submit="set_ctrl.tryToSave()">
 		<div layout="row" layout-padding>
 			<div flex>
@@ -19,7 +19,7 @@
 			</div>
 			
 			<div flex>
-				<h3>Preferred Format Order</h3>
+				<h3>Preferred Format Order <small>(drag &amp; drop)</small></h3>
 
 				<div as-sortable ng-model="set_ctrl.settings.formats">
 					<md-card ng-repeat="format in set_ctrl.settings.formats" as-sortable-item class="draggable">
@@ -35,4 +35,4 @@
 			</div>
 		</div>
 	</form>
-</div>
+</md-content>

@@ -2,31 +2,19 @@
 button {
 	cursor: pointer;
 	border: 0px none;
-	@include colors-accent2;
-
-	&[disabled] {
-		background: grayscale($accent2) !important;
-	}
-
 	&:active, &:focus { outline: 0 none; }
+
+	min-width: 100px;
+
+	&.md-button {
+		padding: 0.5em 0.7em;
+	}
 }
 
 input, button {
 	font-family: "Roboto";
 }
 
-.fat-button, .small-button {
-	padding: 0.3em 0.5em;
-}
-.fat-button {
-	height: 40px;
-
-	font-size: 20px;
-	font-family: "Roboto Condensed";
-
-	@include colors-accent2;
-	@include rounded-shadow-button(5px);
-}
-.small-button {
-	@include rounded-shadow-button(3px);
+.invisible {
+	visibility: hidden;
 }

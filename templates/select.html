@@ -1,97 +1,115 @@
-<div id="sidebar" ng-show="sel_ctrl.loaded">
-	<p class="sidebar-text">
-		Hi, {{sel_ctrl.user_data.firstname}}!
-		<button class="small-button"
-			ng-click="sel_ctrl.logout()">
-			Log out
-		</button>
+<section layout="row" flex ng-show="sel_ctrl.loaded">
+	<md-sidenav id="sidebar" class="md-sidenav-left md-whiteframe-z2" md-is-locked-open="true">
+		<md-toolbar class="md-theme-indigo">
+			<h3 class="md-toolbar-tools">
+				Hi, {{sel_ctrl.user_data.firstname}}!
+			</h3>
+		</md-toolbar>
 
-		<button class="small-button"
-			ng-click="sel_ctrl.showSettings()">
-			Settings
-		</button>
-	</p>
+		<md-content layout="column">
+			<div layout="row" layout-align="end" layout-padding id="sidebar-actions">
+				<md-button ng-click="sel_ctrl.showSettings()" class="md-raised">
+					Settings
+				</md-button>
+				<md-button ng-click="sel_ctrl.logout()">
+					Log out
+				</md-button>
+			</div>
 
-	<form id="release-filter"
-		ng-submit="sel_ctrl.setFilterQuery()">
-		<input placeholder="Search for releases..."
-			type="text" ng-model="sel_ctrl.query">
-	</form>
+			<md-divider></md-divider>
 
-	<div class="subscription"
-		ng-click="sel_ctrl.setActiveSub(null)"
-		ng-class="{ active: sel_ctrl.subscription === null }">
-		<div class="subscription-thumb"
-			ng-style="sel_ctrl.user_data.avatar_url | backgroundImage"></div>
-		All Subscriptions</div>
-	<div ng-repeat="sub in sel_ctrl.user_data.memberships"
-		ng-click="sel_ctrl.setActiveSub(sub)"
-		class="subscription"
-		ng-class="{ active: sel_ctrl.subscription === sub }">
-		<div ng-style="sub.creative.avatar_thumb_url | backgroundImage"
-			class="subscription-thumb"></div>
-		{{sub.creative.service_name}}
-	</div>
+			<div layout="row" layout-padding>
+				<form ng-submit="sel_ctrl.setFilterQuery()">
+					<md-text-float label="Search" ng-model="sel_ctrl.query" id="search-box">
+				</form>
+			</div>
 
-	<hr>
+			<div id="subscriptions">
+				<div class="subscription"
+					ng-click="sel_ctrl.setActiveSub(null)"
+					ng-class="{ active: sel_ctrl.subscription === null }">
+					<div class="subscription-thumb"
+						ng-style="sel_ctrl.user_data.avatar_url | backgroundImage"></div>
+					All Subscriptions
+				</div>
+				<div class="subscription"
+					ng-click="sel_ctrl.setActiveSub(sub)"
+					ng-class="{ active: sel_ctrl.subscription === sub }"
+					ng-repeat="sub in sel_ctrl.user_data.memberships">
+					<div ng-style="sub.creative.avatar_thumb_url | backgroundImage"
+						class="subscription-thumb">
+					</div>
+					{{sub.creative.service_name}}
+				</div>
+			</div>
 
-	<p class="sidebar-text">
-		{{sel_ctrl.selected_count}} selected for download
-		<button class="small-button"
-			ng-disabled="!sel_ctrl.selected_count"
-			ng-click="sel_ctrl.showSelected()">
-			Show</button>
-	</p>
+			<md-divider></md-divider>
 
-	<button id="download-button" class="fat-button"
-		ng-disabled="!sel_ctrl.selected_count"
-		ng-click="sel_ctrl.downloadAll()">
-		GET 'EM ALL
-	</button>
-</div>
+			<div layout="column" layout-padding>
+				<div layout="row" layout-align="center center">
+					<div flex>{{sel_ctrl.selected_count}} selected</div>
+					<md-button class="md-raised" ng-disabled="!sel_ctrl.selected_count"
+						ng-click="sel_ctrl.showSelected()">
+						Show
+					</md-button>
+				</div>
+				<div id="download-button">
+					<md-button
+						class="md-raised md-primary"
+						ng-disabled="!sel_ctrl.selected_count"
+						ng-click="sel_ctrl.downloadAll()">
+						GET 'EM ALL
+					</md-button>
+				</div>
+			</div>
+		</md-content>
+	</md-sidenav>
 
-<div id="content" ng-show="sel_ctrl.loaded">
-	<div id="page-navigation" ng-if="sel_ctrl.page > -1">
-		<button id="prev-page" ng-click="sel_ctrl.seek(false)"
-			ng-show="sel_ctrl.page && sel_ctrl.page > 1">
-			&laquo; Previous</button>
-		<button id="next-page" ng-click="sel_ctrl.seek(true)"
-			ng-show="sel_ctrl.releases.length == 20">
-			Next &raquo;</button>
-		<div id="current-page"><div>{{sel_ctrl.page}}</div></div>
-	</div>
+	<md-content id="content" flex>
+		<div id="page-navigation" ng-if="sel_ctrl.page > -1" layout="row" layout-align="space-between center">
+			<md-button class="md-raised md-primary" ng-click="sel_ctrl.seek(false)"
+				ng-class="{ invisible: !sel_ctrl.page || sel_ctrl.page <= 1 }">
+				&laquo; Previous
+			</md-button>
+			<span>{{sel_ctrl.page}}</span>
+			<md-button class="md-raised md-primary" ng-click="sel_ctrl.seek(true)"
+				ng-class="{ invisible: sel_ctrl.releases.length != 20 }">
+				Next &raquo;
+			</md-button>
+		</div>
 
-	<div id="no-releases"
-		ng-if="!sel_ctrl.releases.length">
-		<h1>Sorry dawg</h1>
-		<h3>I couldn't find any releases with these criteria :(</h3>
-	</div>
+		<div id="no-releases"
+			ng-if="!sel_ctrl.releases.length">
+			<h1>Sorry dawg</h1>
+			<h3>I couldn't find any releases with these criteria :(</h3>
+		</div>
 
-	<div ng-if="sel_ctrl.releases.length">
-		<div class="release-wrapper"
-			ng-repeat="release in sel_ctrl.releases">
-			<div class="release" ng-class="{ selected: (release | isSelectedRelease) }">
-				<div class="cover"
-					title="{{release.artist}} &ndash; {{release.title}}"
-					ng-style="release.cover.cover.thumb.url | backgroundImage">
+		<div ng-if="sel_ctrl.releases.length">
+			<div class="release-wrapper"
+				ng-repeat="release in sel_ctrl.releases">
+				<div class="release" ng-class="{ selected: (release | isSelectedRelease) }">
+					<div class="cover"
+						title="{{release.artist}} &ndash; {{release.title}}"
+						ng-style="release.cover.cover.thumb.url | backgroundImage">
 
-					<div class="select-overlay"
-						ng-click="sel_ctrl.toggleSelected(release)">
-						<div class="overlay-text">
-							<div class="selector">
-								{{release | isSelectedRelease | selectedIndicator}}
+						<div class="select-overlay"
+							ng-click="sel_ctrl.toggleSelected(release)">
+							<div class="overlay-text">
+								<div class="selector">
+									{{release | isSelectedRelease | selectedIndicator}}
+								</div>
 							</div>
 						</div>
+
+						<div class="selected-overlay"></div>
 					</div>
 
-					<div class="selected-overlay"></div>
+					<div class="release-text">
+						<h5 class="release-artist">{{release.artist}}</h5>
+						<h4 class="release-title">{{release.title}}</h4>
+					</div>Settings
 				</div>
-
-				<div class="release-text">
-					<h5 class="release-artist">{{release.artist}}</h5>
-					<h4 class="release-title">{{release.title}}</h4>
-				</div>Settings
 			</div>
 		</div>
-	</div>
-</div>
+	</md-content>
+</section>

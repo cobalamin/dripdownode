@@ -1,32 +1,18 @@
 $sidebar-width: 300px;
 
-// The outer container
-#container {
-	@extend %clearfix;
-	height: 100%;
-}
-
 #sidebar, #content {
-	height: 100%;
 	overflow-y: auto;
 }
 
-// The sidebar
 #sidebar {
-	float: left;
-
 	width: $sidebar-width;
-
-	@include colors-primary;
-
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	position: fixed;
 }
 
-// The content
-#content {
-	padding: $whitespace;
-	width: 100%;
-}
 #sidebar + #content {
-	width: calc(100% - #{$sidebar-width});
+	margin-left: $sidebar-width;
+}
+
+#content {
+	padding: 20px;
 }

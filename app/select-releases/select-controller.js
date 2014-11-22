@@ -73,8 +73,7 @@ function($location, LoginSvc, ReleasesSvc, SettingsSvc, LoadingOverlay) {
 		_this_.subscription = null;
 
 		var releases = ReleasesSvc.getSelectedReleases();
-		// TODO check if functional
-		_this_.releases = _.sort(releases, 'id');
+		_this_.releases = _.sortBy(releases, 'id');
 	}
 
 	function toggleSelected(release) {

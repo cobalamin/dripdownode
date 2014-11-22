@@ -1,17 +1,34 @@
 $subs-height: 30px;
 $sidebar-whitespace: 10px;
 
-#sidebar > * {
-	padding-left: $whitespace;
-	padding-right: $whitespace;
-}
-#sidebar hr {
-	margin-left: $whitespace / 2;
-	margin-right: $whitespace / 2;
+#sidebar {
+	md-toolbar {
+		margin-bottom: 8px;
+	}
+	[layout-padding] {
+		padding-left: $sidebar-whitespace;
+		padding-right: $sidebar-whitespace;
+	}
 
-	@include colors-accent;
-	height: 2px;
-	border: 0 none;
+	button ~ button {
+		margin-left: 0.5em !important;
+	}
+
+	#download-button {
+		margin-top: 8px;
+		button {
+			width: 100%;
+			font-size: 1.2em;
+		}
+	}
+
+	#sidebar-actions {
+		margin-bottom: $sidebar-whitespace;
+	}
+
+	#search-box {
+		margin-top: 0;
+	}
 }
 
 .subscription {
@@ -45,21 +62,5 @@ $sidebar-whitespace: 10px;
 		margin-right: $sidebar-whitespace;
 	}
 
-	padding-top: $sidebar-whitespace;
-	padding-bottom: $sidebar-whitespace;
-}
-
-form#release-filter {
-	margin: 1em 0 0.5em 0;
-
-	input {
-		margin: 0;
-	}
-}
-
-#download-button {
-	margin-left: $whitespace;
-	margin-right: $whitespace;
-
-	width: calc(100% - #{$whitespace * 2});
+	padding: $sidebar-whitespace;
 }

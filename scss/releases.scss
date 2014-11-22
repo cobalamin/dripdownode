@@ -2,13 +2,13 @@
 	display: inline-block;
 	vertical-align: top;
 
-	width: 33.333333%;
-	padding: 0.5em;
+	width: 25%;
+	padding: 8px;
 }
 
-@media(min-width: 1024px) { .release-wrapper { width: 25%; } }
-@media(min-width: 1280px) { .release-wrapper { width: 20%; } }
-@media(min-width: 1600px) { .release-wrapper { width: 16.666666%; } }
+@media(min-width: 1024px) { .release-wrapper { width: 20%; } }
+@media(min-width: 1280px) { .release-wrapper { width: 16.6666666666%; } }
+@media(min-width: 1600px) { .release-wrapper { width: 12.5%; } }
 
 .release {
 	overflow: hidden;
@@ -104,39 +104,10 @@
 }
 
 #page-navigation {
-	@extend %clearfix;
-	position: relative;
-
-	padding: 0.5em;
-
-	height: 60px;
+	padding: 8px;
 
 	button {
-		padding: 1em;
-
-		@include rounded-shadow-button(3px);
-		&#prev-page {
-			float: left;
-		}
-		&#next-page {
-			float: right;
-		}
-	}
-
-	#current-page {
-		position: absolute;
-		top: 0; left: 0;
-		width: 100%; height: 100%;
-
-		z-index: -1;
-
-		text-align: center;
-		display: table;
-
-		> div {
-			display: table-cell;
-			vertical-align: middle;
-		}
+		width: 8em;
 	}
 }
 
