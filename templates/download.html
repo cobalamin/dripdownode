@@ -1,13 +1,10 @@
-<md-toolbar ng-if="!dl_ctrl.error">
+<md-toolbar
+	ng-class="dl_ctrl.error ? 'md-red-theme' : 'md-indigo-theme'">
 	<div class="md-toolbar-tools">
-		<span class="md-flex">
+		<span class="md-flex" ng-if="!dl_ctrl.error">
 			{{dl_ctrl.releases | doneDownloads}} of {{dl_ctrl.releases | objectLength}}
 		</span>
-	</div>
-</md-toolbar>
-<md-toolbar md-theme="red" ng-if="dl_ctrl.error">
-	<div class="md-toolbar-tools">
-		<span class="md-flex">
+		<span class="md-flex" ng-if="dl_ctrl.error">
 			Error: {{dl_ctrl.error}}
 		</span>
 	</div>
@@ -28,11 +25,11 @@
 				</small>
 			</div>
 			<div class="download-state">{{release.download.state || "Waiting"}}</div>
-			<div class="download-progress">
-				<div class="progress-bar"
-				ng-class="release.download | progressClass"
-				ng-style="release.download.progress | progressWidth"></div>
-			</div>
+			<md-progress-linear
+				ng-class="release.download.error ? 'md-red-theme' : 'md-indigo-theme'"
+				md-mode="{{release.download.state | downloadMode}}"
+				ng-value="release.download.progress">
+			</md-progress-linear>
 		</div>
 	</div>
 </div>

@@ -131,14 +131,14 @@ function downloadRelease(settings, release, socket) {
 
 						var percentage = received_length / total_length;
 						if(last_delta / total_length >= 0.01 || percentage >= 1) {
-							socket.emit('dl:progress', { id: release.id, progress: percentage });
+							socket.emit('dl:progress', { id: release.id, progress: Math.floor(percentage * 100) });
 							last_delta = 0;
 						}
 					});
 				}
 				else {
 					// Make it known that we cannot calculate progress
-					socket.emit('dl:progress', { id: release.id, progress: -1 });
+					socket.emit('dl:state', { id: release.id, state: 'unknown' });
 				}
 
 				res.on('end', function() {

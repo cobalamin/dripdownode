@@ -12,7 +12,11 @@ function($scope, ReleasesSvc, SocketSvc, SettingsSvc) {
 	this.releases = _.cloneDeep(ReleasesSvc.getSelectedReleases());
 	// Create download object property on all releases
 	_.each(this.releases, function(release) {
-		release.download = {};
+		release.download = {
+			state: 'waiting',
+			progress: 0,
+			error: false
+		};
 	});
 
 // ----- Init
@@ -26,28 +30,27 @@ function($scope, ReleasesSvc, SocketSvc, SettingsSvc) {
 // Listeners setup
 
 	SocketSvc.on('dl:start', _getReleaseAndDo(function(release) {
-		if(release) release.download.state = "downloading";
+		if(release) release.download.state = 'downloading';
 	}));
 	SocketSvc.on('dl:progress', _getReleaseAndDo(function(release, data) {
 		if(release) release.download.progress = Number(data.progress);
 	}));
 	SocketSvc.on('dl:state', _getReleaseAndDo(function(release, data) {
-		if(release) release.download.state = data.state;
+		if(release) {
+			release.download.state = data.state;
+		}
 	}));
 	SocketSvc.on('dl:format', _getReleaseAndDo(function(release, data) {
 		if(release) release.download.format = data.format;
 	}));
 
 	SocketSvc.on('dl:error', _getReleaseAndDo(function(release, errorObj) {
-		var errorMsg;
 		if(release) {
-			errorMsg = String(errorObj.message);
-			release.download.state = "Error: " + errorMsg;
+			release.download.state = "Error: " + String(errorObj.message);
 			release.download.error = true;
 		}
 		else {
-			errorMsg = String(errorObj);
-			_this_.error = errorMsg;
+			_this_.error = String(errorObj);
 		}
 	}));
 
