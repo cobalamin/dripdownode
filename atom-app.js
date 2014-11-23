@@ -10,7 +10,6 @@ crash_reporter.start();
 // -----
 
 var mainWindow = null
-	, DEV = true
 	, server = null;
 
 // Wait for app to be ready
@@ -26,8 +25,6 @@ app.on('ready', function() {
 		server = httpServer;
 		// Load the main page from the server
 		mainWindow.loadUrl('http://localhost:55221/');
-		// Automatically open dev tools if we're in dev mode
-		if(DEV) mainWindow.toggleDevTools();
 	}, function(error) {
 		mainWindow.toggleDevTools();
 		console.log(error);
