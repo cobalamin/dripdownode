@@ -1,5 +1,8 @@
 .sass-cache/
 node_modules/
+cache/
+build/
+built_app/
 npm-debug.log
 components/
 
