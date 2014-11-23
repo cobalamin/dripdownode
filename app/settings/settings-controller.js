@@ -1,6 +1,6 @@
 angular.module('dripdownode')
-.controller('SettingsController', ['$scope', '$location', 'SettingsService',
-function($scope, $location, SettingsSvc) {
+.controller('SettingsController', ['$scope', '$location', '$timeout', 'SettingsService',
+function($scope, $location, $timeout, SettingsSvc) {
 	var _this_ = this;
 
 // ----- API
@@ -24,8 +24,10 @@ function($scope, $location, SettingsSvc) {
 			// atom-shell API isn't very specific about this return value
 			var chosen_dir = Array.isArray(chosen) ? chosen[0] : chosen;
 			if(chosen_dir) {
-				$scope.$apply(function() {
-					_this_.settings.dl_dir = chosen_dir;
+				$timeout(function() {
+					$scope.$apply(function() {
+						_this_.settings.dl_dir = chosen_dir;
+					});
 				});
 			}
 		});
