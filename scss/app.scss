@@ -18,6 +18,17 @@ body {
 	font-family: "Roboto", sans-serif;
 }
 
+#container {
+	&, > section {
+		height: 100%;
+	}
+
+	#content {
+		height: 100%;
+		overflow: auto;
+	}
+}
+
 @import "general";
 @import "layout";
 @import "loading";
