@@ -21,10 +21,10 @@ const ROOT = GLOBAL.proj_root
 var proxy = httpProxy.createServer();
 app.use('/api', function(req, res) {
 	proxy.web(req, res, {
-		target: 'https://drip.fm/api',
+		target: 'https://drip.kickstarter.com/api',
 		agent: https.globalAgent,
 		headers: {
-			host: 'drip.fm' // ha, you got tricked son
+			host: 'drip.kickstarter.com' // ha, you got tricked son
 		}
 	});
 });
